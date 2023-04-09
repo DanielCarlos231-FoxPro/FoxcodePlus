@@ -5,7 +5,7 @@ This is an open source project downloaded from <a href="https://github.com/VFPX/
 
 Since then I have added to this project the following functionalities
 * Auto-closing { } and () - It already had that working with " ", ' ' and [ ]
-* Showing variables stored in memory at run time - Before, it would show only the variables inside a PRG.
+* Showing variables stored in memory at run time - Before, it would show only the variables inside the current opened PRG.
 * Correction of some bugs like: 
 <ol>
   <li>Foxcodeplus crashing the VFP IDE when loaded in DataEnvironment code editor of a Report.</li>
