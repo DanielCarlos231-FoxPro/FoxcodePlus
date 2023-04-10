@@ -13,6 +13,7 @@ Since then I have added to this project the following functionalities
   <li>The functions from my projects were not loading to the table of Foxcodeplus because I would first copy the PRGs to the TEMP folder of Windows and then I would "SET PATH TO" from there. So, I tweaked it a little bit and got it working on my projects by making it also look in every folder that was set on "SET PATH TO". So, if a PRG was not located at the main folder, it would look through every other folder available in the "SET PATH TO"</li>
 <ol>   
 
+****
 
 # FoxcodePlus
 **Visual Studio like extensions to Visual FoxPro IntelliSense.**
