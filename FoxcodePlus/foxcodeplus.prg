@@ -1,30 +1,33 @@
 */--------------------------------------------------------------------------------------------------------
 */ DANIEL CARLOS ARAÚJO (DCA) - 26/02/2023
+*/ NEW (DCA) - 24/06/2023 - nº (#000007) STATUS (EM TESTES)
+*/						  - Adicionei nas propriedades Arrays de Objectos o [x] ou [x,y] dependendo da Array
+*/						  - Adicionei o mesmo em variáveis Arrays 	
 */ NEW (DCA) - 26/02/2023 - nº (#000006) STATUS (EM TESTES)
-*/				Foi adicionado uma função GetConstantsRunTime() para poder pegar todas as veriávei em Run-Time	
-*/ 			Foi adicionado a busca com "m." nas variáveis em Run-Time	
+*/						  -	Foi adicionado uma função GetConstantsRunTime() para poder pegar todas as veriávei em Run-Time	
+*/ 						  -	Foi adicionado a busca com "m." nas variáveis em Run-Time	
 */
 */ FIX (DCA) - 19/02/2023 - nº (#000000) STATUS (EM TESTES)
-*/				Não estava carregando todas as funções dos PRGs no SET("PROCEDURE")
-*/				A função GetFilePath() estava fazendo a verificação no caminho completo do SET("PRODECURE") e alguns PRGs
-*/	 			se encntravam em pastas diferentes das quais foram instaciadas.	
+*/						  -	Não estava carregando todas as funções dos PRGs no SET("PROCEDURE")
+*/						  -	A função GetFilePath() estava fazendo a verificação no caminho completo do SET("PRODECURE") e alguns PRGs
+*/	 					  -	se encntravam em pastas diferentes das quais foram instaciadas.	
 */
 */ FIX (DCA) - 12/02/2023 - nº (#000000) STATUS (EM TESTES)
-*/				Toda vez que abria O Report Designer e depos O DataEvironment do Report, se fosse acionado o FoxCodePlus, ao fechar o 
-*/				DataEnvironment e na sequência o Report Designer o VFP dava um Crash e fechava.
-*/				Para mais informações verificar a função ChkReportDesigner()							
+*/						  -	Toda vez que abria O Report Designer e depos O DataEvironment do Report, se fosse acionado o FoxCodePlus, ao fechar o 
+*/						  -	DataEnvironment e na sequência o Report Designer o VFP dava um Crash e fechava.
+*/						  -	Para mais informações verificar a função ChkReportDesigner()							
 */
 */ FIX (DCA) - 11/02/2023 - nº (#000000) STATUS (EM TESTES) 
-*/ 			ESTAVA CAUSANDO UM ERRO NO VFP 10, CLICAVA PROGRAMATICAMENTE NA LINHA DE BAIXO 
-*/ 			E ARRASTAVA ATÉ A MESMA POSIÇÃO QUE O CURSOR. O ERRO FOI CORRIGIDO NO this.foxcodeplus.Active() event			
+*/ 						  -	ESTAVA CAUSANDO UM ERRO NO VFP 10, CLICAVA PROGRAMATICAMENTE NA LINHA DE BAIXO 
+*/ 						  -	E ARRASTAVA ATÉ A MESMA POSIÇÃO QUE O CURSOR. O ERRO FOI CORRIGIDO NO this.foxcodeplus.Active() event			
 */ ====>	OBS: ESSE ERRO ESTAVA OCORRENDO DEVIDO A UMA CORREÇÃO DE UM BUG NO MESMO EVENTO 
 */ 
-*/ FIX (DCA) - 00/00/0000 - nº (#000000) STATUS (OK)
-*/			Erro ao no "Error List" quando inicializa o FoxPro que ele está ativo nas configurações do IntelliSense
-*/			Find a better solution I simply used a TRY AND CATCH on ErrorList.Error in the ClassLib FoxCodePlusIntelliSense.VCX
+*/ FIX (DCA) - 28/12/2022 - nº (#000000) STATUS (OK)
+*/						  -	Erro ao no "Error List" quando inicializa o FoxPro que ele está ativo nas configurações do IntelliSense
+*/						  -	Find a better solution I simply used a TRY AND CATCH on ErrorList.Error in the ClassLib FoxCodePlusIntelliSense.VCX
 */
-*/ NEW (DCA) - 00/00/0000 - nº (#000000) STATUS (OK)	
-*/			Add auto close parentheses / curly braces 28/12/2022
+*/ NEW (DCA) - 28/12/2022 - nº (#000001) STATUS (OK)	
+*/						  -	Add auto close parentheses / curly braces 28/12/2022
 */-------------------------------------------------/-------------------------------------------------------
 */
 */--------------------------------------------------------------------------------------------------------	
@@ -324,7 +327,7 @@ define class FoxCodePlusMain as custom
 	chkErrorToolTip = "1" 
 	chkCodeSnippet = "1"
 	chkAutoCloseQuotes = "1"
-	chkAutoCloseParentheses = "1" && (DCA) - 28/12/2022
+	chkAutoCloseParentheses = "1" && (DCA) - 28/12/2022 - nº (#000001)
 	cboSearch = "1"
 	chkMngDesignTime = "1"
 	cboDisplayCount = 10
@@ -359,7 +362,7 @@ define class FoxCodePlusMain as custom
 		this.chkErrorToolTip = strextract(lcSets,"<chkErrorToolTip>","</chkErrorToolTip>")
 		this.chkErrorListDockPos = int( val( strextract(lcSets,"<chkErrorListDockPos>","</chkErrorListDockPos>") ) )
 		this.chkAutoCloseQuotes = strextract(lcSets,"<chkAutoCloseQuotes>","</chkAutoCloseQuotes>")
-		this.chkAutoCloseParentheses = strextract(lcSets,"<chkAutoCloseParentheses>","</chkAutoCloseParentheses>")
+		this.chkAutoCloseParentheses = strextract(lcSets,"<chkAutoCloseParentheses>","</chkAutoCloseParentheses>") && (DCA) - 28/12/2022 - nº (#000001) AUTO CLOSE PARENTHESES AND CURLY BRACES 
 		this.cboSearch = strextract(lcSets,"<cboSearch>","</cboSearch>")
 		this.chkTFsql = strextract(lcSets,"<chkTFsql>","</chkTFsql>")
 		this.chkIncrTablesSql = strextract(lcSets,"<chkIncrTablesSql>","</chkIncrTablesSql>")
@@ -844,7 +847,7 @@ define class FoxCodePlusMain as custom
 				
 					keyboard '{leftarrow}'
 				
-				*** (DCA) - AUTO CLOSE PARENTHESES AND CURLY BRACES - 28/12/2022
+				*** (DCA) - 28/12/2022 - nº (#000001) AUTO CLOSE PARENTHESES AND CURLY BRACES 
 				case inlist(this.LastKey,40,123) and this.chkAutoCloseParentheses = "1"
 					DO case
 					case this.LastKey=40		&&- )  
@@ -1182,10 +1185,93 @@ define class FoxCodePlusMain as custom
 	Endproc 
 	
 	
-	*/------------------------------------------------------------------------------------------------	
+	*/-----------------------------------------------------------------------------------------------------
+	*/*/ (DCA) - 24/06/2023 - Pega o bloco inteiro de linhas dividas pelo ";"
+	*/-----------------------------------------------------------------------------------------------------
+	protect procedure GetTextBlockLine
+			lparameters plnLineNo, pllFullLine
+		local lnStartPos, lnLineNo, lnEndPos, lcString, lnChkLineNo
+
+		set console off
+	
+		plnLineNo = evl(plnLineNo,0)
+			 
+		*- linha onde esta posicionado o cursor
+		if plnLineNo = 0
+			lnLineNo = this.GetLineNo() 
+			if lnLineNo = -1
+				lnLineNo = this.GetLineNo()
+				if lnLineNo = -1
+					return ""
+				endif	
+			endif	
+			lnLineNo = lnLineNo - 1
+		else
+			lnLineNo = plnLineNo - 1
+		endif 
+
+		*- Verifico na linha anterior se existe quebra de linha ";"
+		*- caso exista procuro a linha onde foi iniciado o comando.
+		do while .t.
+			lnChkLineNo = lnLineNo - 1
+			if lnChkLineNo > 0
+				lcString = strtran(strtran(_EdGetStr(this.EditorHwnd, _EdGetLPos(this.EditorHwnd, lnChkLineNo), _EdGetLPos(this.EditorHwnd, lnChkLineNo+1)-1), chr(13), ""), chr(10), "")
+				if right(alltrim(lcString),1)=";"
+					lnLineNo = lnChkLineNo
+					loop
+				else
+					exit	
+				endif
+			else
+				exit	
+			endif
+		enddo 		
+		
+		lcString = ""
+		do while .t.
+			lnChkLineNo = lnLineNo 
+			if lnChkLineNo > 0
+				lcString = Strtra(lcString,";"," ") + strtran(strtran(_EdGetStr(this.EditorHwnd, _EdGetLPos(this.EditorHwnd, lnChkLineNo), _EdGetLPos(this.EditorHwnd, lnChkLineNo+1)-1), chr(13), ""), chr(10), "")
+				if right(alltrim(lcString),1)=";"
+					
+					lnLineNo = lnChkLineNo+1
+					loop
+				else
+					exit	
+				endif
+			else
+				exit	
+			endif
+		enddo
+
+*!*			*- inicio da linha
+*!*			lnStartPos = _EdGetLPos(this.EditorHwnd, lnLineNo)
+*!*			
+*!*			*- fim da linha
+*!*			if pllFullLine
+*!*				*- texto da linha inteira
+*!*				lnEndPos = _EdGetLPos(this.EditorHwnd, lnLineNo+1)-1
+*!*			else
+*!*				*- texto da linha até onde o cursor esta posicionado
+*!*				lnEndPos = _EdGetPos(this.EditorHwnd)
+*!*			endif 
+
+*!*			*- retorno a texto entre as posicoes indicadas
+*!*			if lnStartPos == lnEndPos
+*!*			   lcString = ""
+*!*			else
+*!*			   lnEndPos = lnEndPos - 1   
+*!*			   lcString = strtran(_EdGetStr(this.EditorHwnd, lnStartPos, lnEndPos), ";", "")
+*!*			endif
+
+		return lcString
+	endproc
+
+	
+	*/-----------------------------------------------------------------------------------------------------	
 	*/ Retorna o texto conforme numero da linha especificada, ou o texto da linha atual.
 	*/ O retorno pode ser a linha inteira ou a linha até onde o cursor esta posicionado.
-	*/------------------------------------------------------------------------------------------------	
+	*/-----------------------------------------------------------------------------------------------------	
 	protected procedure GetTextLine
 		lparameters plnLineNo, pllFullLine
 		local lnStartPos, lnLineNo, lnEndPos, lcString, lnChkLineNo
@@ -1639,7 +1725,70 @@ define class FoxCodePlusMain as custom
 		return .t.
 	endproc 
 
-
+	
+	*/------------------------------------------------------------------------------------------------	
+	*/ (DCA) - 24/06/2026 - (EM DESENVOLVIMENTO) - Verificar se a palavra é um Cursor renomeado 
+	*/------------------------------------------------------------------------------------------------	
+	protected procedure GetCursorName
+		LPARAMETERS plcLastWord
+		
+		LOCAL lcAlias, llhasCursor, lcFromText
+		lcAlias = ""
+		llhasCursor = .f.
+		plcLastWord = Strtran(plcLastWord,".","")
+	
+	*	SET STEP ON 
+	
+		*- pego a texto da linha corrente que estou digitando até a posicao do cursor
+		local lcText, lnLineNo
+		lnLineNo = this.GetLineNo()
+		lcText = this.GetTextBlockLine(lnLineNo,.t.)
+ 		lcText = this.TreatLine(lcText)
+	*	lcText = iif(substr(lcText,1,1) = "#", lcText, this.TreatWords(lcText))
+		
+		IF not Lower(GetWordNum(lcText,1)) == "select"  
+			RETURN lcAlias
+		ENDIF
+		
+		IF not (Lower(" "+plcLastWord+" ") $ Lower(lcText) OR;
+				Lower("("+plcLastWord+" ") $ Lower(lcText) OR;
+				Lower("("+plcLastWord+")") $ Lower(lcText) OR; 
+				Lower(" "+plcLastWord+")") $ Lower(lcText) OR; 
+				Lower("("+plcLastWord+".") $ Lower(lcText) OR;
+				Lower(" "+plcLastWord+".") $ Lower(lcText)   ;
+				)
+			RETURN lcAlias
+		endif
+		
+		IF not Lower(" from ") $ Lower(lcText)
+			RETURN lcAlias
+		endif
+		
+*		lcText = "SELECT * FROM PRO AS P"
+*		lcAlias = ""
+		lcFromText = Substr(lcText,At(" from ",Lower(lcText)),Len(lcText))
+		lcFromText = GetWordNum(lcFromText,2)+" "+GetWordNum(lcFromText,3)+" "+GetWordNum(lcFromText,4)+GetWordNum(lcFromText,20)
+		lcFromText = Strtran(Lower(lcFromText)," as "," ")
+		
+		IF InList(Lower(GetWordNum(lcFromText,2)),[where],[into],[order],[group])  
+			RETURN lcAlias
+		ENDIF
+		
+		IF Empty(GetWordNum(lcFromText,2))
+			RETURN lcAlias
+		ENDIF
+		
+		IF !Used(GetWordNum(lcFromText,1))
+		 	RETURN lcAlias
+		ENDIF
+		
+		IF Lower(plcLastWord) == Lower(GetWordNum(lcFromText,2))
+			lcAlias = GetWordNum(lcFromText,1)	
+		ENDIF
+		 		
+		RETURN lcAlias
+	endproc
+	
 	*/------------------------------------------------------------------------------------------------	
 	*/ Busca todos os campos de uma tabela/cursor
 	*/------------------------------------------------------------------------------------------------	
@@ -1647,7 +1796,7 @@ define class FoxCodePlusMain as custom
 		lparameters plcTable
 
 		set console off
-
+		
 		local array laFields[1]
 		laFields[1] = ""
 		local lnLines, lnRows, lnItems, lnx
@@ -2167,7 +2316,7 @@ define class FoxCodePlusMain as custom
 		local lcAlias, llVFPnativeClass, lnItemsFound, lnRowFound
 
 		set console off
-
+		
 		pllAdd = iif(parameters()<=1, .t., pllAdd)
 		lcAlias = alias()
 
@@ -2222,7 +2371,24 @@ define class FoxCodePlusMain as custom
 		if pllAdd
 			if lnItemsFound > 0 
 				for lnx = 1 to lnItemsFound
-					this.AddItem(this.Items[lnx,1], this.Items[lnx,2], this.Items[lnx,3])
+					
+				&& (DCA) - 22/06/2023 - (#000007) ADCIONAR [X, Y] EM PROPRIEDADES ARRAYS 
+					LOCAL laNomVar, lnArrX, lnArrY 
+					laNomVar = this.Items[lnx,1]
+					
+					IF Type("pluObjClass.&laNomVar",1) = 'A'
+						
+						lnArrX = Alltrim(Str(ALEN(pluObjClass.&laNomVar,1)))
+						lnArrY = Alltrim(Str(ALEN(pluObjClass.&laNomVar,2)))
+						laNomVar = laNomVar + "["+lnArrX+Iif(VAL(lnArrY)>0,","+lnArrY,"")+"]"
+						
+					ENDIF
+					
+				*	this.AddItem(this.Items[lnx,1], this.Items[lnx,2], this.Items[lnx,3])	
+					this.AddItem(laNomVar, this.Items[lnx,2], this.Items[lnx,3])
+				&& (DCA) - 22/06/2023 - (#000007) ADCIONAR [X, Y] EM PROPRIEDADES ARRAYS
+					 
+					
 				endfor
 			endif
 		endif
@@ -4222,7 +4388,9 @@ define class FoxCodePlusMain as custom
 		lnLines = iif(empty(this.Items[1,1]), 0, alen(this.Items,1))
 		if lnLines > 0 and pllAdd
 			for lnx = 1 to lnLines
+				
 				this.AddItem(this.Items[lnx,1], this.Items[lnx,2], this.Items[lnx,3])
+			
 			endfor
 		else
 			lnLines = iif(!pllAdd, lnLines, 0)
@@ -4784,7 +4952,14 @@ define class FoxCodePlusMain as custom
 							ENDTEXT
 						
 						CASE locctipvar = "A" && Array
-							prvnArrLen = Alen(&loccnomvar)
+							
+							&& (DCA) - 22/06/2023 - (#000007)
+							LOCAL laArrX, laArrY
+							laArrX 		= Alltrim(Str(Alen(&loccnomvar,1)))
+							laArrY 		= Alltrim(Str(Alen(&loccnomvar,2)))
+							prvnArrLen 	= laArrX + Iif(VAL(laArrY) > 0,","+laArrY,"")
+							&& (DCA) - 22/06/2023 - (#000007)
+							
 							TEXT TO loccToolTp NOSHOW TEXTMERGE PRETEXT 2
 								<<loccnomvar>>[<<prvnArrLen>>] (<<locctipvar>>) = Array[...]
 								This is an Array instantiated in memory (at run-time)
@@ -4840,7 +5015,25 @@ define class FoxCodePlusMain as custom
 			
 			lnItemsFound = lnItemsFound + 1
 		
-			this.AddItem(proper(laVaribles[lnCounter,1]),laVaribles[lnCounter,2],laVaribles[lnCounter,3])	
+		&& (DCA) - 22/06/2023 - (#000007)
+			LOCAL laNomeVar
+			laNomeVar = laVaribles[lnCounter,1]
+			
+			IF Version(5) == 900 && EM FOX PRO 9 (OBS: NÃO SEI SE TODO O PROGRAMA VERIFICA A VERSÃO QUANDO PRECISA)
+				
+				IF Type("&laNomeVar",1) = "A"
+					LOCAL laArrX, laArrY
+					laArrX = Alltrim(Str(Alen(&laNomeVar,1)))
+					laArrY = Alltrim(Str(Alen(&laNomeVar,2)))
+					laNomeVar = laNomeVar + "["+ laArrX + Iif(VAL(laArrY) > 0,","+laArrY,"") + "]"		
+				
+				ENDIF
+				
+			ENDIF
+			
+		*	this.AddItem(proper(laVaribles[lnCounter,1]),laVaribles[lnCounter,2],laVaribles[lnCounter,3])	
+			this.AddItem(proper(laNomeVar),laVaribles[lnCounter,2],laVaribles[lnCounter,3])	
+		&& (DCA) - 22/06/2023 (#000007)
 			
 		endfor
 		
@@ -5183,7 +5376,8 @@ define class FoxCodePlusMain as custom
 				( lower(lcLastWord) <> "this." and type(lcLastWord2) = "O" ) or ;
 				( ("[" $ lcText and "]." $ lcText) or ("(" $ lcText and ")." $ lcText) ) or ;
 				( used(lcLastWord2) ) or ;
-				( lnCountTables > 0 and ascan(laItemsTables, lcLastWord2, -1,-1, 1, 15) > 0 and not empty(laItemsTables[1,1]))
+				( lnCountTables > 0 and ascan(laItemsTables, lcLastWord2, -1,-1, 1, 15) > 0 and not empty(laItemsTables[1,1])) or;
+				!Empty(this.GetCursorName(lcLastWord2))
 
 				_edInsert(this.EditorHwnd, ".", 1)
 				llCheckFoxCodePlus = .t.
@@ -5360,7 +5554,6 @@ define class FoxCodePlusMain as custom
 					endif
 					this.IncrementalResult = .t.
 
-
 				*- objetos instanciados em write-time usando createobject(), createobjectex(), newobject() ou "for each"
 				case lnCountVars > 0 and this.IsObjInWriteTime(lcLastWord2, @laItemsVars)
 					this.IncrementalResult = .f.
@@ -5391,8 +5584,14 @@ define class FoxCodePlusMain as custom
 						lnLines = this.GetMembers(evaluate(lcObjName),.t.,.t.)
 						this.IncrementalResult = .t.
 					endif
-
-
+					
+				
+				*- (DCA) - 24/06/2023 - campos de tabela/cursor por apelido
+				case !Empty(this.GetCursorName(lcLastWord2)) AND "." $ lcLastWord  
+					this.IncrementalResult = .f.
+					lnLines = this.GetFields(this.GetCursorName(lcLastWord2))
+					this.IncrementalResult = .t.
+					
 				*- campos de uma tabela ou cursor em run-time
 				case used(lcLastWord2)
 					this.IncrementalResult = .f.
