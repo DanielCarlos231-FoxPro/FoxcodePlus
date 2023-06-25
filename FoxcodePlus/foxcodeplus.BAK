@@ -1,5 +1,7 @@
 */--------------------------------------------------------------------------------------------------------
 */ DANIEL CARLOS ARAÚJO (DCA) - 26/02/2023
+*/ NEW (DCA) - 24/06/2023 - nº (#000008) STATUS (EM TESTES)
+*/						  - Adicionei a busca dos campos de um cursor pelo o seu apelido 								
 */ NEW (DCA) - 24/06/2023 - nº (#000007) STATUS (EM TESTES)
 */						  - Adicionei nas propriedades Arrays de Objectos o [x] ou [x,y] dependendo da Array
 */						  - Adicionei o mesmo em variáveis Arrays 	
@@ -1186,10 +1188,10 @@ define class FoxCodePlusMain as custom
 	
 	
 	*/-----------------------------------------------------------------------------------------------------
-	*/*/ (DCA) - 24/06/2023 - Pega o bloco inteiro de linhas dividas pelo ";"
+	*/*/ (DCA) - 24/06/2023 - nº (#000008) - Pega o bloco inteiro de linhas dividas pelo ";"
 	*/-----------------------------------------------------------------------------------------------------
 	protect procedure GetTextBlockLine
-			lparameters plnLineNo, pllFullLine
+			lparameters plnLineNo
 		local lnStartPos, lnLineNo, lnEndPos, lcString, lnChkLineNo
 
 		set console off
@@ -1216,6 +1218,7 @@ define class FoxCodePlusMain as custom
 			lnChkLineNo = lnLineNo - 1
 			if lnChkLineNo > 0
 				lcString = strtran(strtran(_EdGetStr(this.EditorHwnd, _EdGetLPos(this.EditorHwnd, lnChkLineNo), _EdGetLPos(this.EditorHwnd, lnChkLineNo+1)-1), chr(13), ""), chr(10), "")
+				lcString = chrtran(lcString,chr(9)," ")
 				if right(alltrim(lcString),1)=";"
 					lnLineNo = lnChkLineNo
 					loop
@@ -1227,11 +1230,14 @@ define class FoxCodePlusMain as custom
 			endif
 		enddo 		
 		
+		*/ faço uma concatenação deste a linha inicial 
+		*/ até a linha final do bloco de texto feito com o ";"
 		lcString = ""
 		do while .t.
 			lnChkLineNo = lnLineNo 
 			if lnChkLineNo > 0
 				lcString = Strtra(lcString,";"," ") + strtran(strtran(_EdGetStr(this.EditorHwnd, _EdGetLPos(this.EditorHwnd, lnChkLineNo), _EdGetLPos(this.EditorHwnd, lnChkLineNo+1)-1), chr(13), ""), chr(10), "")
+				lcString = chrtran(lcString,chr(9)," ")
 				if right(alltrim(lcString),1)=";"
 					
 					lnLineNo = lnChkLineNo+1
@@ -1243,26 +1249,6 @@ define class FoxCodePlusMain as custom
 				exit	
 			endif
 		enddo
-
-*!*			*- inicio da linha
-*!*			lnStartPos = _EdGetLPos(this.EditorHwnd, lnLineNo)
-*!*			
-*!*			*- fim da linha
-*!*			if pllFullLine
-*!*				*- texto da linha inteira
-*!*				lnEndPos = _EdGetLPos(this.EditorHwnd, lnLineNo+1)-1
-*!*			else
-*!*				*- texto da linha até onde o cursor esta posicionado
-*!*				lnEndPos = _EdGetPos(this.EditorHwnd)
-*!*			endif 
-
-*!*			*- retorno a texto entre as posicoes indicadas
-*!*			if lnStartPos == lnEndPos
-*!*			   lcString = ""
-*!*			else
-*!*			   lnEndPos = lnEndPos - 1   
-*!*			   lcString = strtran(_EdGetStr(this.EditorHwnd, lnStartPos, lnEndPos), ";", "")
-*!*			endif
 
 		return lcString
 	endproc
@@ -1727,7 +1713,7 @@ define class FoxCodePlusMain as custom
 
 	
 	*/------------------------------------------------------------------------------------------------	
-	*/ (DCA) - 24/06/2026 - (EM DESENVOLVIMENTO) - Verificar se a palavra é um Cursor renomeado 
+	*/ (DCA) - 24/06/2026 - nº (#000008) - (EM TESTES) - Verificar se a palavra é um Cursor renomeado 
 	*/------------------------------------------------------------------------------------------------	
 	protected procedure GetCursorName
 		LPARAMETERS plcLastWord
@@ -1737,14 +1723,11 @@ define class FoxCodePlusMain as custom
 		llhasCursor = .f.
 		plcLastWord = Strtran(plcLastWord,".","")
 	
-	*	SET STEP ON 
-	
 		*- pego a texto da linha corrente que estou digitando até a posicao do cursor
 		local lcText, lnLineNo
 		lnLineNo = this.GetLineNo()
-		lcText = this.GetTextBlockLine(lnLineNo,.t.)
+		lcText = this.GetTextBlockLine(lnLineNo)
  		lcText = this.TreatLine(lcText)
-	*	lcText = iif(substr(lcText,1,1) = "#", lcText, this.TreatWords(lcText))
 		
 		IF not Lower(GetWordNum(lcText,1)) == "select"  
 			RETURN lcAlias
@@ -5588,7 +5571,7 @@ define class FoxCodePlusMain as custom
 					endif
 					
 				
-				*- (DCA) - 24/06/2023 - campos de tabela/cursor por apelido
+				*- (DCA) - 24/06/2023 - nº (#000008) - campos de tabela/cursor por apelido
 				case !Empty(this.GetCursorName(lcLastWord2)) AND "." $ lcLastWord  
 					this.IncrementalResult = .f.
 					lnLines = this.GetFields(this.GetCursorName(lcLastWord2))
