@@ -1750,15 +1750,17 @@ define class FoxCodePlusMain as custom
 			RETURN lcAlias
 		ENDIF
 		
-		IF not (Lower(" "+plcLastWord+" ") $ Lower(lcText) OR;
-				Lower("("+plcLastWord+" ") $ Lower(lcText) OR;
-				Lower("("+plcLastWord+")") $ Lower(lcText) OR; 
-				Lower(" "+plcLastWord+")") $ Lower(lcText) OR; 
-				Lower("("+plcLastWord+".") $ Lower(lcText) OR;
-				Lower(" "+plcLastWord+".") $ Lower(lcText)   ;
-				)
-			RETURN lcAlias
-		endif
+		&& ACREDITO QUE NÃO PRECISA DISSO - REMOVER DEPOIS
+*!*			IF not (Lower(" "+plcLastWord+" ") $ Lower(lcText) OR;
+*!*					Lower("("+plcLastWord+" ") $ Lower(lcText) OR;
+*!*					Lower("("+plcLastWord+")") $ Lower(lcText) OR; 
+*!*					Lower(" "+plcLastWord+")") $ Lower(lcText) OR; 
+*!*					Lower("("+plcLastWord+".") $ Lower(lcText) OR;
+*!*					Lower(" "+plcLastWord+".") $ Lower(lcText)   ;
+*!*					)
+*!*				RETURN lcAlias
+*!*			endif
+		&& ACREDITO QUE NÃO PRECISA DISSO - REMOVER DEPOIS
 		
 		IF not Lower(" from ") $ Lower(lcText)
 			RETURN lcAlias
@@ -1767,7 +1769,7 @@ define class FoxCodePlusMain as custom
 *		lcText = "SELECT * FROM PRO AS P"
 *		lcAlias = ""
 		lcFromText = Substr(lcText,At(" from ",Lower(lcText)),Len(lcText))
-		lcFromText = GetWordNum(lcFromText,2)+" "+GetWordNum(lcFromText,3)+" "+GetWordNum(lcFromText,4)+GetWordNum(lcFromText,20)
+		lcFromText = GetWordNum(lcFromText,2)+" "+GetWordNum(lcFromText,3)+" "+GetWordNum(lcFromText,4)
 		lcFromText = Strtran(Lower(lcFromText)," as "," ")
 		
 		IF InList(Lower(GetWordNum(lcFromText,2)),[where],[into],[order],[group])  
