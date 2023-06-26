@@ -1,10 +1,16 @@
 */--------------------------------------------------------------------------------------------------------
-*/ DANIEL CARLOS ARAÚJO (DCA) - 26/02/2023
+*/ DANIEL CARLOS ARAÚJO (DCA) 
+*/ NEW (DCA) - 25/06/2023 - nº (#000009) STATUS (EM TESTES)
+*/						  - Alterei as funções que coletavam as Tabelas e o campos na conexão SGBD para
+*/						  - Para pegar em todas as Conexões		
+*/
 */ NEW (DCA) - 24/06/2023 - nº (#000008) STATUS (EM TESTES)
 */						  - Adicionei a busca dos campos de um(a) Tabela/Cursor pelo o seu apelido 								
+*/
 */ NEW (DCA) - 24/06/2023 - nº (#000007) STATUS (EM TESTES)
 */						  - Adicionei nas propriedades Arrays de Objectos o [x] ou [x,y] dependendo da Array
 */						  - Adicionei o mesmo em variáveis Arrays 	
+*/
 */ NEW (DCA) - 26/02/2023 - nº (#000006) STATUS (EM TESTES)
 */						  -	Foi adicionado uma função GetConstantsRunTime() para poder pegar todas as veriávei em Run-Time	
 */ 						  -	Foi adicionado a busca com "m." nas variáveis em Run-Time	
@@ -1008,13 +1014,13 @@ define class FoxCodePlusMain as custom
 		
 	endproc 
 
-	*/************************************************************************************************
-	*/ (DCA) + TESTES
+	*/*************************************************************************************************/*
+	*/ (DCA) + TESTES																				   /*		
 	*/-------------------------------------------------------------------------------------------------/*
-	*/ Verficar se somente o Report Designer está aberto sem o DataEnvironment do Report.  	  			/*
-	*/ Quando abria o Report Desiner e depois o DataEnvironment, se fosse acionado o FoxCodePlus e		/*
-	*/ fosse fechar o Report, ocorria um Crash no VFP e ele fechava, provavelmente por que o 				/* 												/*
-	*/ FoxCodePlus continuava ativo no BackGround																		/* 									
+	*/ Verficar se somente o Report Designer está aberto sem o DataEnvironment do Report.  	  		   /*
+	*/ Quando abria o Report Desiner e depois o DataEnvironment, se fosse acionado o FoxCodePlus e	   /*
+	*/ fosse fechar o Report, ocorria um Crash no VFP e ele fechava, provavelmente por que o 		   /*
+	*/ FoxCodePlus continuava ativo no BackGround													   /* 									
 	*/-------------------------------------------------------------------------------------------------/*
 	protected procedure ChkReportDesigner()
 		IF (WEXIST("Report Designer") AND WONTOP("Report Designer")) AND NOT this.HasReportOnTop &&OR (WEXIST("Data Environment - Report Designer") AND WONTOP("Data Environment - Report Designer"))
@@ -1710,7 +1716,77 @@ define class FoxCodePlusMain as custom
 		
 		return .t.
 	endproc 
+	
+	*/------------------------------------------------------------------------------------------------
+	*/ (DCA) - 24/06/2023 - Pegar a posiçao onde fecha um delimitador em um String
+	*/					  - Com delimitadores em nesting	
+	*/------------------------------------------------------------------------------------------------
+	protected procedure GetEndOfDelimeter
+		Lparameters plcString, plcOpenDel, plcCloseDel
 
+		Local lnOpenDel, lnCloseDel, lnStrPos, lnStrChar
+		
+		IF Type('plcOpenDel') <> "C" OR Type('plcCloseDel') <> "C"
+			plcOpenDel  = "("
+			plcCloseDel = ")"
+		endif
+		
+		lnOpenDel = 0
+		lnCloseDel = 0
+		lnStrChar = ""
+		lnStrPos = At(plcOpenDel, plcString, 1)
+		
+		Do While .T.
+			lnStrChar = Substr(plcString, lnStrPos, 1)
+
+			If lnStrChar == plcOpenDel
+				lnOpenDel = lnOpenDel + 1
+			Endif
+
+			If lnStrChar == plcCloseDel
+				lnCloseDel = lnCloseDel + 1
+			Endif
+
+			If lnOpenDel == lnCloseDel
+				Exit
+			Endif
+
+			If lnStrPos > Len(plcString)
+				Exit
+			Endif
+
+			lnStrPos = lnStrPos + 1
+		Enddo
+
+		If lnOpenDel <> lnCloseDel
+			lnStrPos = 0
+		Endif
+
+		Return lnStrPos
+
+	endproc
+	
+	*/------------------------------------------------------------------------------------------------	
+	*/ (DCA) - 24/06/2023 - nº (#000008) - Varrer String em procura de Cursores
+	*/------------------------------------------------------------------------------------------------	
+	protected procedure GetAllCursorsName
+		lparameters plcString
+		
+		LOCAL lcWord, lnWordCount, lcCursores
+		lcCursores = ""
+		FOR lnWordCount = 1 TO GetWordCount(plcString) 
+			lcWord = GetWordNum(plcString,lnWordCount)
+		
+			IF Used(lcWord)
+				lcCursores = lcCursores + "," + lcWord
+			endif
+		
+		ENDFOR
+		
+		lcCursores = Strtran(lcCursores,",","",1,1)
+				
+		RETURN lcCursores
+	endproc
 	
 	*/------------------------------------------------------------------------------------------------	
 	*/ (DCA) - 24/06/2026 - nº (#000008) - (EM TESTES) - Verificar se a palavra é um Cursor renomeado 
@@ -1718,58 +1794,105 @@ define class FoxCodePlusMain as custom
 	protected procedure GetCursorName
 		LPARAMETERS plcLastWord
 		
-		LOCAL lcAlias, llhasCursor, lcFromText
+		LOCAL lcAlias, llhasCursor, lcAliasText, lcParText
 		lcAlias = ""
 		llhasCursor = .f.
-		plcLastWord = Strtran(plcLastWord,".","")
+		plcLastWord = Lower(Strtran(plcLastWord,".",""))
 	
 		*- pego a texto da linha corrente que estou digitando até a posicao do cursor
 		local lcText, lnLineNo
 		lnLineNo = this.GetLineNo()
 		lcText = this.GetTextBlockLine(lnLineNo)
- 		lcText = this.TreatLine(lcText)
+ 		lcText = Lower(this.TreatLine(lcText))
 		
-		IF not Lower(GetWordNum(lcText,1)) == "select"  
+		DO WHILE "  " $ lcText
+			lcText = Strtran(lcText,"  "," ")
+		ENDDO
+		
+	*	SET STEP ON 
+		
+		IF not GetWordNum(lcText,1) == "select"  
 			RETURN lcAlias
 		ENDIF
 		
-		&& ACREDITO QUE NÃO PRECISA DISSO - REMOVER DEPOIS
-*!*			IF not (Lower(" "+plcLastWord+" ") $ Lower(lcText) OR;
-*!*					Lower("("+plcLastWord+" ") $ Lower(lcText) OR;
-*!*					Lower("("+plcLastWord+")") $ Lower(lcText) OR; 
-*!*					Lower(" "+plcLastWord+")") $ Lower(lcText) OR; 
-*!*					Lower("("+plcLastWord+".") $ Lower(lcText) OR;
-*!*					Lower(" "+plcLastWord+".") $ Lower(lcText)   ;
-*!*					)
-*!*				RETURN lcAlias
-*!*			endif
-		&& ACREDITO QUE NÃO PRECISA DISSO - REMOVER DEPOIS
-		
-		IF not Lower(" from ") $ Lower(lcText)
+		IF not " from " $ lcText
 			RETURN lcAlias
 		endif
 		
-*		lcText = "SELECT * FROM PRO AS P"
-*		lcAlias = ""
-		lcFromText = Substr(lcText,At(" from ",Lower(lcText)),Len(lcText))
-		lcFromText = GetWordNum(lcFromText,2)+" "+GetWordNum(lcFromText,3)+" "+GetWordNum(lcFromText,4)
-		lcFromText = Strtran(Lower(lcFromText)," as "," ")
+		&& Verificar se o Alias do "From" é o que está sendo procurado
+		lcAliasText = Substr(lcText,At(" from ",lcText),Len(lcText))
 		
-		IF InList(Lower(GetWordNum(lcFromText,2)),[where],[into],[order],[group])  
+		IF Left(Alltrim(lcAliasText),6) == "from ("
+			lcParText = Substr(lcAliasText, At("(", lcAliasText, 1)+1 ,This.GetEndOfDelimeter(lcAliasText)-At("(", lcAliasText, 1)-1)
+			lcAliasText = This.GetAllCursorsName(lcParText)+" "+Substr(lcAliasText, This.GetEndOfDelimeter(lcAliasText)+1,Len(lcAliasText))
+		else
+			lcAliasText = GetWordNum(lcAliasText,2)+" "+GetWordNum(lcAliasText,3)+" "+GetWordNum(lcAliasText,4)
+		endif
+
+		lcAliasText = Strtran(lcAliasText," as "," ")
+		
+		IF InList(GetWordNum(lcAliasText,2),[where],[into],[order],[group])  
 			RETURN lcAlias
 		ENDIF
 		
-		IF Empty(GetWordNum(lcFromText,2))
+		IF Empty(GetWordNum(lcAliasText,2))
 			RETURN lcAlias
 		ENDIF
 		
-		IF !Used(GetWordNum(lcFromText,1))
+		IF 	!Used(GetWordNum(lcAliasText,1)) AND; 
+			!("," $ GetWordNum(lcAliasText,1))
+			
 		 	RETURN lcAlias
 		ENDIF
 		
-		IF Lower(plcLastWord) == Lower(GetWordNum(lcFromText,2))
-			lcAlias = GetWordNum(lcFromText,1)	
+		IF plcLastWord == GetWordNum(lcAliasText,2)
+			lcAlias = GetWordNum(lcAliasText,1)	
 		ENDIF
+		 
+		IF !Empty(lcAlias)
+			RETURN lcAlias
+		endif 
+		
+		&& Verificar se o Alias do "Join" é o que está sendo procurado 
+		LOCAL lcTmpText
+		lcTmpText = Lower(lcText)
+		DO WHILE .T.
+			
+			lcAliasText = Substr(lcTmpText,At("join",lcTmpText),Len(lcTmpText))
+			
+			IF GetWordNum(lcAliasText,1) <> "join"
+				EXIT 
+			ENDIF
+			
+			lcAliasText = GetWordNum(lcAliasText,2)+" "+GetWordNum(lcAliasText,3)+" "+GetWordNum(lcAliasText,4)
+			lcAliasText = Strtran(lcAliasText," as "," ")
+			
+			IF InList(GetWordNum(lcAliasText,2),[where],[into],[order],[group])  
+				EXIT 
+			ENDIF
+			
+			IF Empty(GetWordNum(lcAliasText,2))
+				EXIT 
+			ENDIF
+			
+			IF !Used(GetWordNum(lcAliasText,1))
+			 	EXIT 
+			ENDIF
+			
+			IF plcLastWord == GetWordNum(lcAliasText,2)
+				lcAlias = GetWordNum(lcAliasText,1)	
+			ENDIF
+			 
+			IF !Empty(lcAlias)
+				EXIT 
+			ENDIF
+			
+			 lcTmpText = Strtran(lcTmpText,"join"," ",1,1)
+			
+			IF NOT "join" $ lcTmpText
+				EXIT 
+			ENDIF
+		ENDDO	 
 		 		
 		RETURN lcAlias
 	endproc
@@ -1881,29 +2004,65 @@ define class FoxCodePlusMain as custom
 		lcSqlTables = "tmp"+sys(2015)
 
 		*- busco as tabelas no database
-		if asqlhandles(laCnx) > 0 and sqltables(1,"TABLE",lcSqlTables) = 1
+		if asqlhandles(laCnx) > 0 &&and sqltables(1,"TABLE",lcSqlTables) = 1
 			lcAlias = alias()
 			
-			select (lcSqlTables)
-			scan 
-				if this.ChkIncremental(plcWord, table_name)
-					lnItemsFound = lnItemsFound + 1
+			&& (DCA) - 25/06/2023 - nº #000009 - Get All Tables from ALL Connections
+			LOCAL lnIdHandle
+			
+			lnIdHandle = laCnx[1]
+			DO WHILE lnIdHandle <= Alen(laCnx) 
+			
+				IF sqltables(laCnx[lnIdHandle],"TABLE",lcSqlTables) = 1 
 					
-					lcToolTip = "Table " + alltrim(table_cat)+"."+alltrim(Table_schem)+"."+alltrim(Table_name)
-					if not empty(nvl(Remarks,""))
-						lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
-					endif	
-					
-					dimension this.ItemsTables[lnItemsCnt+lnItemsFound,2]
-					this.ItemsTables[lnItemsCnt+lnItemsFound,1] = alltrim(table_name)
-					this.ItemsTables[lnItemsCnt+lnItemsFound,2] = alltrim(lcToolTip)
-					
-					if pllAdd					
-						this.AddItem(alltrim(table_name), 16, lcToolTip)
-					endif
-				endif
-			endscan
+					select (lcSqlTables)
+					scan 
+						if this.ChkIncremental(plcWord, table_name)
+							lnItemsFound = lnItemsFound + 1
+							
+							lcToolTip = "Table " + alltrim(table_cat)+"."+alltrim(Table_schem)+"."+alltrim(Table_name)
+							if not empty(nvl(Remarks,""))
+								lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
+							endif	
+							
+							dimension this.ItemsTables[lnItemsCnt+lnItemsFound,2]
+							this.ItemsTables[lnItemsCnt+lnItemsFound,1] = alltrim(table_name)
+							this.ItemsTables[lnItemsCnt+lnItemsFound,2] = alltrim(lcToolTip)
+							
+							if pllAdd					
+								this.AddItem(alltrim(table_name), 16, lcToolTip)
+							endif
+						endif
+					endscan
 
+					
+				ENDIF
+				
+				lnIdHandle = lnIdHandle + 1
+			ENDDO
+			
+*!*				select (lcSqlTables)
+*!*				scan 
+*!*					if this.ChkIncremental(plcWord, table_name)
+*!*						lnItemsFound = lnItemsFound + 1
+*!*						
+*!*						lcToolTip = "Table " + alltrim(table_cat)+"."+alltrim(Table_schem)+"."+alltrim(Table_name)
+*!*						if not empty(nvl(Remarks,""))
+*!*							lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
+*!*						endif	
+*!*						
+*!*						dimension this.ItemsTables[lnItemsCnt+lnItemsFound,2]
+*!*						this.ItemsTables[lnItemsCnt+lnItemsFound,1] = alltrim(table_name)
+*!*						this.ItemsTables[lnItemsCnt+lnItemsFound,2] = alltrim(lcToolTip)
+*!*						
+*!*						if pllAdd					
+*!*							this.AddItem(alltrim(table_name), 16, lcToolTip)
+*!*						endif
+*!*					endif
+*!*				endscan
+
+			&& (DCA) - 25/06/2023 - nº #000009 - Get All Tables from ALL Connections
+			
 			use in &lcSqlTables
 			if used(lcAlias)
 				select (lcAlias)
@@ -2052,32 +2211,71 @@ define class FoxCodePlusMain as custom
 		lcSqlFields = "tmp"+sys(2015)
 
 		try			
-			if asqlhandles(laCnx) > 0 and sqlcolumns(1, plcTable, "NATIVE", lcSqlFields) = 1
+			if asqlhandles(laCnx) > 0 &&and sqlcolumns(1, plcTable, "NATIVE", lcSqlFields) = 1
 				lcAlias = alias()
 				
-				select (lcSqlFields)
-				scan 
-					if this.ChkIncremental(this.LastWord, column_name)
-						lnItemsFound = lnItemsFound + 1
+				&& (DCA) - 25/06/2023 - nº #000009 - Get All Field from ALL Connections
+				LOCAL lnIdHandle
+				
+				lnIdHandle = laCnx[1]
+				DO WHILE lnIdHandle<=Alen(laCnx)
+					IF sqlcolumns(laCnx[lnIdHandle], plcTable, "NATIVE", lcSqlFields) = 1
 						
-						lcToolTip = "Column " + alltrim(column_name) + ", " + alltrim(type_name) 
-						lcToolTip = lcToolTip + iif(isnull(sql_datetime_sub), "(" + alltrim(str(column_size)) + iif(empty(nvl(decimal_digits,0)), "", ","+alltrim(str(decimal_digits))) + ")"  ,"") +  ", "
-						lcToolTip = lcToolTip + iif(lower(alltrim(is_nullable))="no","not","") + " null"
-						
-						if not empty(nvl(column_def,""))
-							lcToolTip = lcToolTip + chr(13) + "Defaul value: " + alltrim(strtran(column_def, chr(0), " "))
-						endif	
-								    
-						if not empty(nvl(Remarks,""))
-							lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
-						endif	
-						
-						lcToolTip = lcToolTip + chr(13) + "Table " + alltrim(table_cat)+"."+alltrim(Table_schem)+"."+alltrim(Table_name)
+						select (lcSqlFields)
+						scan 
+							if this.ChkIncremental(this.LastWord, column_name)
+								lnItemsFound = lnItemsFound + 1
+								
+								lcToolTip = "Column " + alltrim(column_name) + ", " + alltrim(type_name) 
+								lcToolTip = lcToolTip + iif(isnull(sql_datetime_sub), "(" + alltrim(str(column_size)) + iif(empty(nvl(decimal_digits,0)), "", ","+alltrim(str(decimal_digits))) + ")"  ,"") +  ", "
+								lcToolTip = lcToolTip + iif(lower(alltrim(is_nullable))="no","not","") + " null"
+								
+								if not empty(nvl(column_def,""))
+									lcToolTip = lcToolTip + chr(13) + "Default value: " + alltrim(strtran(column_def, chr(0), " "))
+								endif	
+										    
+								if not empty(nvl(Remarks,""))
+									lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
+								endif	
+								
+								lcToolTip = lcToolTip + chr(13) + "Table " + alltrim(table_cat)+"."+alltrim(Table_schem)+"."+alltrim(Table_name)
 
-						this.AddItem(alltrim(column_name), 17, lcToolTip)
-					endif
-				endscan
+								this.AddItem(alltrim(column_name), 17, lcToolTip)
+							endif
+						endscan
+						
+					ENDIF
+					
+					lnIdHandle = lnIdHandle + 1
+				ENDDO
+				
+				
+				
+*!*					select (lcSqlFields)
+*!*					scan 
+*!*						if this.ChkIncremental(this.LastWord, column_name)
+*!*							lnItemsFound = lnItemsFound + 1
+*!*							
+*!*							lcToolTip = "Column " + alltrim(column_name) + ", " + alltrim(type_name) 
+*!*							lcToolTip = lcToolTip + iif(isnull(sql_datetime_sub), "(" + alltrim(str(column_size)) + iif(empty(nvl(decimal_digits,0)), "", ","+alltrim(str(decimal_digits))) + ")"  ,"") +  ", "
+*!*							lcToolTip = lcToolTip + iif(lower(alltrim(is_nullable))="no","not","") + " null"
+*!*							
+*!*							if not empty(nvl(column_def,""))
+*!*								lcToolTip = lcToolTip + chr(13) + "Defaul value: " + alltrim(strtran(column_def, chr(0), " "))
+*!*							endif	
+*!*									    
+*!*							if not empty(nvl(Remarks,""))
+*!*								lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
+*!*							endif	
+*!*							
+*!*							lcToolTip = lcToolTip + chr(13) + "Table " + alltrim(table_cat)+"."+alltrim(Table_schem)+"."+alltrim(Table_name)
 
+*!*							this.AddItem(alltrim(column_name), 17, lcToolTip)
+*!*						endif
+*!*					endscan
+				
+				&& (DCA) - 25/06/2023 - nº #000009 - Get All Field from ALL Connections
+				
 				use in &lcSqlFields
 				if used(lcAlias)
 					select (lcAlias)
@@ -5573,9 +5771,18 @@ define class FoxCodePlusMain as custom
 				
 				*- (DCA) - 24/06/2023 - nº (#000008) - campos de tabela/cursor por apelido
 				case !Empty(this.GetCursorName(lcLastWord2)) AND "." $ lcLastWord  
-					this.IncrementalResult = .f.
-					lnLines = this.GetFields(this.GetCursorName(lcLastWord2))
-					this.IncrementalResult = .t.
+					
+					LOCAL lcAlias, lnWordCount
+					lnWordCount = 1 
+					lcAlias = this.GetCursorName(lcLastWord2)
+					lcAlias = Strtran(lcAlias,","," ")
+					
+					FOR lnWordCount = 1 TO GetWordCount(lcAlias)
+						this.IncrementalResult = .f.
+						lnLines = this.GetFields(GetWordNum(lcAlias,lnWordCount))
+						this.IncrementalResult = .t.
+					ENDFOR
+					
 					
 				*- campos de uma tabela ou cursor em run-time
 				case used(lcLastWord2)
