@@ -1,2 +1,124 @@
+RETURN 
+Error in line 78: Statement is not in a procedure.
+USE IN 0 C:\ArtSystem\ASPROPRO ALIAS ASPROPRO
+Error in line 80: Statement is not in a procedure.
+USE IN 0 C:\ArtSystem\ASPROPRE ALIAS ASPROPRE
+Error in line 81: Statement is not in a procedure.
+USE IN 0 C:\ArtSystem\ASPRODEP ALIAS ASPRODEP
+Error in line 82: Statement is not in a procedure.
+Select * 	 FROM aspropro PRO 			 LEFT JOIN ASPROPRE PRE ON PRE.PRENID_PRO = PRO.PRONID_PRO 	 AND PRE.PRENID_LOJ = 1 				 
+Error in line 89: Statement is not in a procedure.
+RETURN
+Error in line 90: Statement is not in a procedure.
+CREATE TABLE teste (NOM C(10), LastName C(10), AGE N, num1 N, num2 N, num3 N)
+Error in line 92: Statement is not in a procedure.
+INSERT INTO TESTE (NOM, LASTNAME, AGE, num1, num3, num2) VALUES ("DANIEL"	,"CARLOS"	, 29, 1, 2, 3)
+Error in line 93: Statement is not in a procedure.
+INSERT INTO TESTE (NOM, LASTNAME, AGE, num1, num3, num2) VALUES ("PATRÍCIA"	,"ALARIC"	, 29, 1, 2, 3)
+Error in line 94: Statement is not in a procedure.
+INSERT INTO TESTE (NOM, LASTNAME, AGE, num1, num3, num2) VALUES ("ALARIC"	,"CARLOS"	, 45, 1, 2, 3)
+Error in line 95: Statement is not in a procedure.
+SELECT TABE.AGE , TABE.LASTNAME, TABE.num1, TABE.num2, Round(TABE.Num3,2),  TABE	  FROM Teste TABE
+Error in line 100: Statement is not in a procedure.
+RETURN
+Error in line 102: Statement is not in a procedure.
+Prvotmpobj.Prvotmpobj.Prvatmparr[1].Prvatmparr[5]
+Error in line 104: Statement is not in a procedure.
+PUBLIC PRVOTMPOBJ
+Error in line 108: Statement is not in a procedure.
+PRVOTMPOBJ = CreateObject("EMPTY")
+Error in line 109: Statement is not in a procedure.
+AddProperty(PRVOTMPOBJ, "PRVOTMPOBJ", CreateObject("EMPTY"))
+Error in line 110: Statement is not in a procedure.
+AddProperty(PRVOTMPOBJ.PRVOTMPOBJ,"PRVATMPARR[5]", .NULL.)
+Error in line 111: Statement is not in a procedure.
+PRVOTMPOBJ.PRVOTMPOBJ.PRVATMPARR[1] =  CreateObject("EMPTY")
+Error in line 112: Statement is not in a procedure.
+AddProperty(PRVOTMPOBJ.PRVOTMPOBJ.PRVATMPARR[1],"PRVATMPARR[5]", .NULL.)
+Error in line 113: Statement is not in a procedure.
+PRVOTMPOBJ.PRVOTMPOBJ.PRVATMPARR[1].PRVATMPARR[1] = 1
+Error in line 114: Statement is not in a procedure.
+PRVOTMPOBJ.PRVOTMPOBJ.PRVATMPARR[1].PRVATMPARR[2] = 2
+Error in line 115: Statement is not in a procedure.
+PRVOTMPOBJ.PRVOTMPOBJ.PRVATMPARR[1].PRVATMPARR[3] = 3
+Error in line 116: Statement is not in a procedure.
+PRVOTMPOBJ.PRVOTMPOBJ.PRVATMPARR[1].PRVATMPARR[4] = 4
+Error in line 117: Statement is not in a procedure.
+PRVOTMPOBJ.PRVOTMPOBJ.PRVATMPARR[1].PRVATMPARR[5] = 5
+Error in line 118: Statement is not in a procedure.
+PRVOTMPOBJ.PRVOTMPOBJ.PRVATMPARR[2] = 2
+Error in line 119: Statement is not in a procedure.
+PRVOTMPOBJ.PRVOTMPOBJ.PRVATMPARR[3] = 3
+Error in line 120: Statement is not in a procedure.
+PRVOTMPOBJ.PRVOTMPOBJ.PRVATMPARR[4] = 4
+Error in line 121: Statement is not in a procedure.
+PRVOTMPOBJ.PRVOTMPOBJ.PRVATMPARR[5] = 5
+Error in line 122: Statement is not in a procedure.
+text to lcSelect noshow textmerge
+Error in line 124: Statement is not in a procedure.
+	select	Customers.CustomerID
+Error in line 125: Statement is not in a procedure.
+	from Orders Rodrigo
+Error in line 126: Statement is not in a procedure.
+	inner join Customers (nolock) on Orders.CustomerID = customers.CustomerID
+Error in line 127: Statement is not in a procedure.
+	inner join [Order Details] OrderItems (nolock) on Orders.OrderID = OrderItems.OrderID
+Error in line 128: Statement is not in a procedure.
+	inner join Products (nolock) on OrderItems.ProductID = Products.ProductID
+Error in line 129: Statement is not in a procedure.
+	order by CustomerID, OrderID, 
+Error in line 130: Statement is not in a procedure.
+endtext
+Error in line 131: Statement is not in a procedure.
+text to lcInsert noshow textmerge
+Error in line 161: Statement is not in a procedure.
+	insert into Customers (ContactTitle, CustomerID) values ("Rodrigo")
+Error in line 162: Statement is not in a procedure.
+endtext
+Error in line 163: Statement is not in a procedure.
+text to lcUpdate noshow textmerge
+Error in line 166: Statement is not in a procedure.
+	update Shippers set CompanyName = 'Bruscain' where ShipperID = '0001'
+Error in line 167: Statement is not in a procedure.
+endtext 
+Error in line 168: Statement is not in a procedure.
+text to lcDelect noshow textmerge
+Error in line 171: Statement is not in a procedure.
+	delete from Customers set
+Error in line 172: Statement is not in a procedure.
+endtext    
+Error in line 173: Statement is not in a procedure.
 replace myfield with "myvalue" + 
-Error in line 90: Missing operand.
+Error in line 175: Missing operand.
+if sqlexec(lnCnx, lcSelect, "MyCursor") = 1
+Error in line 180: Statement is not in a procedure.
+messagebox("Sql IntelliSense")	
+Error in line 181: Statement is not in a procedure.
+endif  
+Error in line 182: Statement is not in a procedure.
+if 1 = 0
+Error in line 187: Statement is not in a procedure.
+endif 
+Error in line 189: Statement is not in a procedure.
+text to lcSelect noshow textmerge
+Error in line 201: Statement is not in a procedure.
+	select	Customers.CustomerID, Customers.CompanyName, Customers.City,
+Error in line 202: Statement is not in a procedure.
+			Orders.OrderID, Orders.OrderDate, orderitems.ProductID, 
+Error in line 203: Statement is not in a procedure.
+			Products.ProductName 
+Error in line 204: Statement is not in a procedure.
+	from Orders Rodrigo
+Error in line 205: Statement is not in a procedure.
+	inner join Customers (nolock) on Orders.CustomerID = customers.CustomerID
+Error in line 206: Statement is not in a procedure.
+	inner join [Order Details] OrderItems (nolock) on Orders.OrderID = OrderItems.OrderID
+Error in line 207: Statement is not in a procedure.
+	inner join Products (nolock) on OrderItems.ProductID = Products.ProductID
+Error in line 208: Statement is not in a procedure.
+	inner join  
+Error in line 209: Statement is not in a procedure.
+	order by CustomerID, OrderID, 
+Error in line 210: Statement is not in a procedure.
+endtext
+Error in line 211: Statement is not in a procedure.

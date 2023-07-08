@@ -1,5 +1,12 @@
 */--------------------------------------------------------------------------------------------------------
 */ DANIEL CARLOS ARAÚJO (DCA) 
+*/ FIX (DCA) - 26/06/2023 - nº (#000011) STATUS (EM TESTES)
+*/						  - O método da classe FoxCodePlusIntellisense.AddItem estava causando erro 
+*/ 						  - ao tentar inserir valores no __xfcpitems quando o cursor não existia
+*/ FIX (DCA) - 26/06/2023 - nº (#000010) STATUS (EM TESTES)
+*/						  - Coloquei um NODEFAULT no foxcodeplusintellisense.tabs.tabpage1.items.mousedown
+*/						  - Por quê mesmo com a procedure ignorando o Erro o FoxCodePlus fechava o VFP, com o NoDefault 
+*/						  - parece que esse problema foi solucionado				
 */ NEW (DCA) - 25/06/2023 - nº (#000009) STATUS (EM TESTES)
 */						  - Alterei as funções que coletavam as Tabelas e o campos na conexão SGBD para
 */						  - Para pegar em todas as Conexões		
@@ -317,7 +324,7 @@ define class FoxCodePlusMain as custom
 	dimension ItemsTables[1,2]						&&& tabelas encontradas em write-time e o codigo de programa de criação da mesma.
 	dimension ItemsObjects[1,3]						&&& objetos adicionados pelo "define class ... add object" e suas respectivas classes.
 	dimension ItemsAuxVars[1,4]						&&& usado para auxiliar nas variaveis valorizadas por outra variavel (Var = AnotherVar)
-	dimension Environment[9]						&&& array que controla o ambiente da IDE do VFP para o Foxcodeplus
+	dimension Environment[10]						&&& array que controla o ambiente da IDE do VFP para o Foxcodeplus
 	dimension ItemsCodeSnippets[1,2]				&&& Itens definidos no foxcode.dbf	
 	dimension FoxcodeFunctions[1]					&&& Funcoes contidas no foxcode.dbf
 	
@@ -474,8 +481,10 @@ define class FoxCodePlusMain as custom
 	protected procedure GetKeyPressed
 		lparameters pln1 as Integer, pln2 as Integer, plnKey as Integer, pln4 as Integer, pll5 as Boolean
 		
+		
 		set console off
 		sys(2030,0) 
+		
 		
 		*- check if debug is active
 		*- desabilito o IntelliSense se o debug estiver ativo para nao entrar em conflito com o foxcodeplus.		
@@ -483,7 +492,8 @@ define class FoxCodePlusMain as custom
 		if this.HasDebugger
 			if this.IntelliSense.Showed 
 				this.IntelliSense.hide()
-			endif
+			ENDIF
+			
 			sys(2030,1)
 			return 
 		endif
@@ -508,6 +518,8 @@ define class FoxCodePlusMain as custom
 		 		this.IntelliSense.Showed = .F.  
 				this.IntelliSense.hide() 
 		*	endif
+		
+			
 			sys(2030,1)
 			return 
 		ENDIF
@@ -521,6 +533,8 @@ define class FoxCodePlusMain as custom
 		
 		*- Restore VFP environment
 		this.SetFoxcodePlusEnvironment(0)			
+		
+		
 					
 		*this.EditorToolTip.NoClose = .f.		
 		set console on
@@ -592,7 +606,7 @@ define class FoxCodePlusMain as custom
 
 		*- caso pressionei uma das teclas válidas para acionar o IntelliSense
 		*- De a "A" a "Z"                 de "a" a "z" ....               de "0" a "9" ....             "." or "*" or "#" or "_" or "Backspace"
-		if between(this.LastKey,65,90) or between(this.LastKey,97,122) or between(this.LastKey,48,57) or inlist(this.LastKey,46,42,35,95,127)
+		if between(this.LastKey,65,90) or between(this.LastKey,97,122) or between(this.LastKey,48,57) or inlist(this.LastKey,46,42,35,95,127) 
 			
 			this.IntelliSense.ManualChoice = .f.
 			
@@ -779,7 +793,10 @@ define class FoxCodePlusMain as custom
 						*- 
 						if getwordnum(lower(this.TextEndBlock),1) == "select" or " where " $ lower(this.TextEndBlock)
 							local array laCnx[1]
+							
 							if this.chkIncrTablesSql = "1"
+							*	WAIT WIND Textmerge("<<this.LastWord>> <<Datetime()>>") NOWAIT NoClear
+							
 								lnLines = lnLines + this.GetSqlTables(this.LastWord, .t., .t.)				&&- tabelas no SQL	 	
 								lnLines = lnLines + this.GetSqlTablesInCmd(this.LastWord, 2, .t., .f.)		&&- alias no instruncao SQL
 							else
@@ -855,17 +872,21 @@ define class FoxCodePlusMain as custom
 				
 					keyboard '{leftarrow}'
 				
-				*** (DCA) - 28/12/2022 - nº (#000001) AUTO CLOSE PARENTHESES AND CURLY BRACES 
-				case inlist(this.LastKey,40,123) and this.chkAutoCloseParentheses = "1"
+				*** (DCA) - 28/12/2022 - nº (#000001) AUTO CLOSE PARENTHESIS AND CURLY BRACES 
+				case inlist(this.LastKey,40,123) and this.chkAutoCloseParentheses = "1"					
 					DO case
-					case this.LastKey=40		&&- )  
-							keyboard ')'
-							
-					case this.LastKey=123	&&- } 
-							keyboard "{RBRACE}"		
-					endcase 		
-					keyboard '{leftarrow}'
-							
+					case this.LastKey=40		&&- )
+						
+					*	IF ascan(this.FoxcodeFunctions, chrtran(This.lastWord,"()",""), -1,-1, 1, 15) == 0
+							keyboard '){leftarrow}'		
+					*	ENDif
+						
+					case this.LastKey=123		&&- } 
+						keyboard "{RBRACE}{leftarrow}"		
+					
+					ENDCASE
+					
+					
 				*- up arrow, down arrow, page up, page down, ctrl+home, ctrl+end or enter
 				case inlist(this.LastKey,5,24,3,18,29,23,13)
 					*- se troquei de linha faço a compilação em write-time para obter os erros
@@ -875,7 +896,7 @@ define class FoxCodePlusMain as custom
 							this.GetErrorList()
 						endif	
 					endif
-
+				
 
 				*- se pressionei "(" or "," or LeftArrow or RightArrow 
 				case inlist(this.lastkey,40,44,19,4) and not inlist(plnKey,17,83) 		&&-plnKey 17 and 83 is CTRL+S
@@ -884,10 +905,9 @@ define class FoxCodePlusMain as custom
 					endif	
 
 					*- verifico se tem assinatura de metodo ou funcao para ser apresentanda no tooltip
-					if not this.IsTextEndText
+					if not this.IsTextEndText  
 						this.GetSignature()
 					endif
-											
 					
 				*- limpo pq fechei o IntelliSense e posso recomeçar a pesquisa incremental
 				case this.lastkey = 27
@@ -904,7 +924,7 @@ define class FoxCodePlusMain as custom
 					* dont use this place.
 					
 					
-				*- escondo o IntelliSense
+				*- escondo o IntelliSense	
 				otherwise 
 					if this.lastkey <> 46
 						if this.IntelliSense.Showed 
@@ -1808,9 +1828,7 @@ define class FoxCodePlusMain as custom
 		DO WHILE "  " $ lcText
 			lcText = Strtran(lcText,"  "," ")
 		ENDDO
-		
-		SET STEP ON 
-		
+			
 		IF not GetWordNum(lcText,1) == "select"  
 			RETURN lcAlias
 		ENDIF
@@ -1980,6 +1998,78 @@ define class FoxCodePlusMain as custom
 
 
 	*/------------------------------------------------------------------------------------------------	
+	*/ (DCA) - busca nome do database que está conectado (ainda não está em uso)
+	*/------------------------------------------------------------------------------------------------	
+	procedure GetDatabase
+		lparameters plcWord
+		, pllAdd, pllClearArray
+		local lnItemsFound, lcAlias, lcToolTip, lcDatabases, lnItemsCnt
+		local array laCnx[1]
+		
+		set console off
+	
+		if this.chkTFsql <> "1"
+			return 0
+		endif 
+		
+		if pllClearArray
+			declare this.ItemsTables[1,2]
+			this.ItemsTables[1,1] = ""
+			this.ItemsTables[1,2] = ""
+		endif	
+	
+		lnItemsFound = 0
+		lnItemsCnt = iif(empty(this.ItemsTables[1,1]), 0, alen(this.ItemsTables,1))
+		lcDatabases = "tmp"+sys(2015)
+		
+		
+		*/-----------------------------------------/*
+		Try
+			if asqlhandles(laCnx) > 0
+				
+				lcAlias = alias()
+				LOCAL lnIdHandle
+				
+				lnIdHandle = 1
+				DO WHILE lnIdHandle>0 AND lnIdHandle <= Alen(laCnx,1)
+				
+					If sqltables(laCnx[lnIdHandle],"TABLE",lcDatabases) = 1 
+					
+						Select (lcDatabases)
+						Select Table_cat, Table_schem From (lcDatabases) Group by Table_cat, Table_schem into cursor (lcDatabases) 
+
+						Select (lcDatabases)
+						Go Top
+						scan 
+							if this.ChkIncremental(plcWord, Table_cat)
+								lnItemsFound = lnItemsFound + 1
+							
+							
+								
+							
+							endif
+						endscan
+						 
+					
+					Endif
+				
+					lnIdHandle = lnIdHandle + 1
+				Enddo	
+				
+				use in &lcDatabases
+				if used(lcAlias)
+					select (lcAlias)
+				endif
+			endif
+		Catch  
+		Endtry
+		
+		*/-----------------------------------------/*
+		
+		return lnItemsFound	
+	endproc
+	
+	*/------------------------------------------------------------------------------------------------	
 	*/ Busca as tabelas do database SGBD - SQL
 	*/------------------------------------------------------------------------------------------------	
 	procedure GetSqlTables
@@ -2004,42 +2094,43 @@ define class FoxCodePlusMain as custom
 		lcSqlTables = "tmp"+sys(2015)
 
 		*- busco as tabelas no database
-		if asqlhandles(laCnx) > 0 &&and sqltables(1,"TABLE",lcSqlTables) = 1
-			lcAlias = alias()
-			
-			&& (DCA) - 25/06/2023 - nº #000009 - Get All Tables from ALL Connections
-			LOCAL lnIdHandle
-			
-			lnIdHandle = laCnx[1]
-			DO WHILE lnIdHandle <= Alen(laCnx) 
-			
-				IF sqltables(laCnx[lnIdHandle],"TABLE",lcSqlTables) = 1 
-					
-					select (lcSqlTables)
-					scan 
-						if this.ChkIncremental(plcWord, table_name)
-							lnItemsFound = lnItemsFound + 1
-							
-							lcToolTip = "Table " + alltrim(table_cat)+"."+alltrim(Table_schem)+"."+alltrim(Table_name)
-							if not empty(nvl(Remarks,""))
-								lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
-							endif	
-							
-							dimension this.ItemsTables[lnItemsCnt+lnItemsFound,2]
-							this.ItemsTables[lnItemsCnt+lnItemsFound,1] = alltrim(table_name)
-							this.ItemsTables[lnItemsCnt+lnItemsFound,2] = alltrim(lcToolTip)
-							
-							if pllAdd					
-								this.AddItem(alltrim(table_name), 16, lcToolTip)
-							endif
-						endif
-					endscan
-
-					
-				ENDIF
+		TRY 
+			if asqlhandles(laCnx) > 0 &&and sqltables(1,"TABLE",lcSqlTables) = 1
+				lcAlias = alias()
 				
-				lnIdHandle = lnIdHandle + 1
-			ENDDO
+				&& (DCA) - 25/06/2023 - nº #000009 - Get All Tables from ALL Connections
+				LOCAL lnIdHandle
+				
+				lnIdHandle = 1
+				DO WHILE lnIdHandle>0 AND lnIdHandle <= Alen(laCnx,1)
+				
+					IF sqltables(laCnx[lnIdHandle],"TABLE",lcSqlTables) = 1 
+						
+						select (lcSqlTables)
+						scan 
+							if this.ChkIncremental(plcWord, table_name)
+								lnItemsFound = lnItemsFound + 1
+								
+								lcToolTip = "Table " + alltrim(table_cat)+"."+alltrim(Table_schem)+"."+alltrim(Table_name)
+								if not empty(nvl(Remarks,""))
+									lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
+								endif	
+								
+								dimension this.ItemsTables[lnItemsCnt+lnItemsFound,2]
+								this.ItemsTables[lnItemsCnt+lnItemsFound,1] = alltrim(table_name)
+								this.ItemsTables[lnItemsCnt+lnItemsFound,2] = alltrim(lcToolTip)
+								
+								if pllAdd					
+									this.AddItem(alltrim(table_name), 16, lcToolTip)
+								endif
+							endif
+						endscan
+
+						
+					ENDIF
+					
+					lnIdHandle = lnIdHandle + 1
+				ENDDO
 			
 *!*				select (lcSqlTables)
 *!*				scan 
@@ -2063,11 +2154,14 @@ define class FoxCodePlusMain as custom
 
 			&& (DCA) - 25/06/2023 - nº #000009 - Get All Tables from ALL Connections
 			
-			use in &lcSqlTables
-			if used(lcAlias)
-				select (lcAlias)
+				use in &lcSqlTables
+				if used(lcAlias)
+					select (lcAlias)
+				endif
 			endif
-		endif
+		CATCH 
+		ENDTRY
+		
 	
 		return lnItemsFound	
 	endproc
@@ -2101,9 +2195,8 @@ define class FoxCodePlusMain as custom
 		*- Se nao estou conectado forço o intellisense a trabalhar com Tables and Alias
 		plnMode= iif(plnMode=2 and asqlhandles(laCnx) <= 0, 0, plnMode) 				
 
-
 		*- valido somente para select, insert, update and delete		
-		if	( getwordnum(lower(this.TextEndBlock),1) == "select" and (" from " $ this.TextEndBlock or " join " $ this.TextEndBlock) ) or;
+		if	( getwordnum(lower(this.TextEndBlock),1) == "select" and (" from " $ Lower(this.TextEndBlock) or " join " $ Lower(this.TextEndBlock) ) ) or;
 			( getwordnum(lower(this.TextEndBlock),1) == "insert" and getwordnum(lower(this.TextEndBlock),2) == "into" ) or;
 			( getwordnum(lower(this.TextEndBlock),1) == "delete" and getwordnum(lower(this.TextEndBlock),2) == "from" ) or;
 			( getwordnum(lower(this.TextEndBlock),1) == "update" ) 
@@ -2126,7 +2219,7 @@ define class FoxCodePlusMain as custom
 				lcWord = getwordnum(lcSelect, lnx)
 
 				*- considero tabelas depois do comando FROM ou JOIN
-				if inlist(lower(alltrim(lcWord)), "from", "join", "into", "update")
+				if inlist(lower(alltrim(lcWord)), "from", "join", "into", "update", "apply")
 
 					lcSqlTable = getwordnum(lcSelect, lnx+1)
 					if substr(lcSqlTable,1,1) = "["		&&- large table name
@@ -2217,11 +2310,18 @@ define class FoxCodePlusMain as custom
 				&& (DCA) - 25/06/2023 - nº #000009 - Get All Field from ALL Connections
 				LOCAL lnIdHandle
 				
-				lnIdHandle = laCnx[1]
-				DO WHILE lnIdHandle<=Alen(laCnx)
+				lnIdHandle = 1
+				DO WHILE lnIdHandle>0 AND lnIdHandle<=Alen(laCnx,1)
 					IF sqlcolumns(laCnx[lnIdHandle], plcTable, "NATIVE", lcSqlFields) = 1
 						
 						select (lcSqlFields)
+						
+						IF Reccount(lcSqlFields) == 0
+							lnIdHandle = lnIdHandle + 1
+							LOOP
+						ENDIF
+						
+						GO TOP
 						scan 
 							if this.ChkIncremental(this.LastWord, column_name)
 								lnItemsFound = lnItemsFound + 1
@@ -6433,7 +6533,7 @@ define class FoxCodePlusMain as custom
 	*/------------------------------------------------------------------------------------------------	
 	procedure GetErrorList
 		set console off
-
+			
 		if this.chkErrorList <> "1" or vartype(this.FormErrorList)<>"O" 
 			return
 		endif
@@ -6790,7 +6890,7 @@ define class FoxCodePlusMain as custom
 		      lcProcPar, lnProcPar, lcToolTip, lcDescription, lcParName, llGetDescription, lcObj, llProcFound
 
 		local array laItems[1,3]
-
+		
 		set console off
 		
 		*- verifica se o VFP esta parametrizado para apresentar tooltip para assinatura de metodos e funcoes
@@ -6802,7 +6902,7 @@ define class FoxCodePlusMain as custom
 		lcText = this.TreatLine(this.GetTextLine())
 		
 		*- identifico o nome da funcao ou metodo ao qual estou posicionado
-		lnLen = len(lcText)
+		lnLen = len(lcText)  
 		lnOpenedProc = 0
 		lcProc = ""
 		
@@ -6876,7 +6976,7 @@ define class FoxCodePlusMain as custom
 		lcSignature = ""
 		lcDescription = ""
 		llProcFound = .f.
-
+		
 		*- busco a assinatura para o METODO encontrado na classe corrente do PRG
 		if "." $ lcProc and this.editorSource <> 10
 			lcObj = alltrim(lower(substr(lcProc, 1, rat(".", lcProc)-1)))
@@ -6912,12 +7012,14 @@ define class FoxCodePlusMain as custom
 
 		*- busco a assinatura para a FUNCAO encontrada
 		else
+			
 			lcSignature = ""
 			lnRowFound = ascan(this.FoxcodeFunctions, lcProc, -1,-1, 1, 15)
 
 			*- verifico se é uma funcao nativa do VFP
 			*if not empty(laItems[1,2])
 			if not empty(lnRowFound)
+				
 				*llGetDescription = .f.
 				*lnLines = 1
 				*lcProc = alltrim(laItems[1,2])
@@ -6946,7 +7048,7 @@ define class FoxCodePlusMain as custom
 				endif
 			endif
 		endif
-
+		
 		if not llProcFound 
 			return
 		endif
@@ -7091,7 +7193,37 @@ define class FoxCodePlusMain as custom
 		return lInQuote
 	endfunc
 	
+	
+	*** <summary>
+	***	(DCA) - 27/06/2023 - Functions returns whether current editor position is at a location within Parentheses  
+	*** </summary>
+	*** <param name="plcText">Last Word</param>
+	*** <remarks></remarks>
+	protected procedure IsInParentheses
+		lparameters plcText 
+		local i, lcChar, lInParenthesis, lcParenthesisChar
+		
+		set console off
+		
+		lInParenthesis = .f.
+				 
+		for i = 1 to len(plcText)
+			lcChar = substr(plcText,m.i,1)
+			if !lInParenthesis
+				if lcChar = "("
+					lcParenthesisChar = lcChar
+				endif
+			else
+				if (lcParenthesisChar="(" and lcChar=")") 
+					lInParenthesis = .t.
+				endif
+			endif
+		ENDFOR
+		
+		return lInParenthesis
+	endfunc
 
+		
 	*/------------------------------------------------------------------------------------------------	
 	*/ Functions returns whether current editor position is at a location within Text...EndText
 	*/------------------------------------------------------------------------------------------------	
@@ -7208,6 +7340,8 @@ define class FoxCodePlusMain as custom
 			this.Environment[ 7] = set("MESSAGE",1)
 			this.Environment[ 8] = 0		&&sys(2030)
 			this.Environment[ 9] = _tally
+			this.Environment[10] = Set('TABLEPROMPT') && (DCA) - 26/06/2023 - Desativa o Prompt de tabela que abre 
+													  &&  automaticamente do FoxPro, quando o Cursor/Tabela não existe
 
 			set talk off
 			set notify cursor off
@@ -7215,6 +7349,7 @@ define class FoxCodePlusMain as custom
 			set exclusive off
 			set udfparms to value
 			set exact on
+			set tableprompt off
 			*sys(2030,0)
 		else
 			if this.Environment[1]="ON"
@@ -7235,6 +7370,13 @@ define class FoxCodePlusMain as custom
 			if this.Environment[6]="OFF"
 				set exact off 
 			endif
+
+			&& (DCA) - 26/06/2023 - Desativa o Prompt de tabela que abre 
+			&&  automaticamente do FoxPro, quando o Cursor/Tabela não existe
+			if this.Environment[10]="ON"
+				set tableprompt on
+			endif
+			
 			*sys(2030,int(val(this.Environment[8])))
 			_tally = this.Environment[9]
 		endif 
@@ -7386,6 +7528,7 @@ define class FoxCodePlusMain as custom
 		*- até porque nao existe codigo nesse metodo"
 		if lower(plcMethod) == "foxcodeplusintellisense.tabs.tabpage1.items.mousedown"
 			&&- do nothing
+			RETURN .F.
 		else
 			try	
 				*- objeto que contem as informacoes da versao do foxcodeplus	

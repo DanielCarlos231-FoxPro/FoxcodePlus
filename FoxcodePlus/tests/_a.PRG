@@ -1,5 +1,81 @@
 
 
+TEXT TO LCTEXT NOSHOW TEXTMERGE
+	SELECT 
+		
+		NFC 									
+		
+		FROM ASNFECAB NFC   
+ENDTEXT
+
+AS_ConnectToAll()
+
+*** <summary>
+*** Connectar a todos os databases - função em testes
+*** </summary>
+*** <param name="ppar1">numérico</param>
+*** <param name="ppar2">não sei</param>
+*** <remarks></remarks>
+FUNCTION AS_ConnectToAll
+	LPARAMETERS ppar1, ppar2
+		PUBSERV = "ARTSYSTEM-DEV01\ARTSQL"
+		PUBUSUA = "SA"
+		PUBSENH = "1234"
+		TEXT TO PARSSQL1 NOSHOW Textmerge  
+			DRIVER=SQL SERVER;SERVER=<<PUBSERV>>;DATABASE=AS_CAD;UID=<<PUBUSUA>>;PWD=<<PUBSENH>>;APP=teste versao;WSID=
+		ENDTEXT
+		
+		TEXT TO PARSSQL2 NOSHOW Textmerge
+			DRIVER=SQL SERVER;SERVER=<<PUBSERV>>;DATABASE=AS_FIN;UID=<<PUBUSUA>>;PWD=<<PUBSENH>>;APP=teste versao;WSID=
+		ENDTEXT
+		
+		TEXT TO PARSSQL3 NOSHOW Textmerge 
+			DRIVER=SQL SERVER;SERVER=<<PUBSERV>>;DATABASE=AS_LOG;UID=<<PUBUSUA>>;PWD=<<PUBSENH>>;APP=teste versao;WSID=
+		ENDTEXT
+		
+		TEXT TO PARSSQL4 NOSHOW Textmerge 
+			DRIVER=SQL SERVER;SERVER=<<PUBSERV>>;DATABASE=AS_<<LEFT(Dtoc(Date(),1),6)>>;UID=<<PUBUSUA>>;PWD=<<PUBSENH>>;APP=teste versao;WSID=
+		ENDTEXT
+	
+		IdHandle1 = SQLSTRINGCONNECT(PARSSQL1)
+		IdHandle2 = SQLSTRINGCONNECT(PARSSQL2)
+		IdHandle3 = SQLSTRINGCONNECT(PARSSQL3)
+		IdHandle4 = SQLSTRINGCONNECT(PARSSQL4)
+		
+		IF IdHandle1<=0
+			SQLErrHand()
+		ENDIF
+		
+		IF IdHandle2<=0
+			SQLErrHand()
+		ENDIF
+		
+		IF IdHandle3<=0
+			SQLErrHand()
+		ENDIF
+		
+		IF IdHandle4<=0
+			SQLErrHand()
+		ENDIF
+		
+ENDFUNC
+
+*********************************
+&& HANDLER DE ERROS NA CONEXÃO &&
+*********************************
+Procedure SQLErrHand()
+  local lcError
+  lcError = ''
+  Aerror(arrCheck)
+  For ix=1 To 7
+    lcError = m.lcError+Trans( arrCheck [ix])+ Chr(13)
+  Endfor
+  Messagebox(m.lcError,0,'Error def.')
+ENDPROC
+
+
+
+RETURN 
 
 USE IN 0 C:\ArtSystem\ASPROPRO ALIAS ASPROPRO
 USE IN 0 C:\ArtSystem\ASPROPRE ALIAS ASPROPRE

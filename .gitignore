@@ -1,0 +1,38 @@
+# Testes
+#ignore all folder with this name in all levels
+**/limpeza/**
+**/tests/**
+**/test/**
+**/teste/**
+**/testes/**
+
+# use glob syntax.
+syntax: glob
+
+# VFP generated files
+*.err
+*.ERR
+*.mpr
+*.MPR
+
+# VFP compiled files
+*.fxp
+*.FXP
+*.mpx
+*.MPX
+*.qpx
+*.QPX
+
+# VFP backup files
+*.bak
+*.BAK
+*.tbk
+*.TBK
+
+# Misc backup files
+*.orig
+*.ORIG
+*.save
+*.SAVE
+*.zip
+*.ZIP
