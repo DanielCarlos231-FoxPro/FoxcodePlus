@@ -5,7 +5,9 @@
 **/test/**
 **/teste/**
 **/testes/**
-commitTeste
+
+#PowerShell Scripts
+*.ps1
 
 # use glob syntax.
 syntax: glob
