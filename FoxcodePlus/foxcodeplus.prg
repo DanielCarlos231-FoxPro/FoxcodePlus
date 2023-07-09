@@ -35,7 +35,7 @@
 */	 					  -	se encntravam em pastas diferentes das quais foram instaciadas.	
 */
 */ FIX (DCA) - 12/02/2023 - nº (#000004) STATUS (OK)
-*/						  -	Toda vez que abria O Report Designer e depos O DataEvironment do Report, se fosse acionado o FoxCodePlus, ao fechar o 
+*/						  -	Toda vez que abria O Report Designer e depois O DataEvironment do Report, se fosse acionado o FoxCodePlus, ao fechar o 
 */						  -	DataEnvironment e na sequência o Report Designer o VFP dava um Crash e fechava.
 */						  -	Para mais informações verificar a função ChkReportDesigner()							
 */
