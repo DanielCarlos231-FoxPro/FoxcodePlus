@@ -13,7 +13,7 @@ Since then I have added to this project the following functionalities
 # Fixed Bugs
 <ol>
   <li>Foxcodeplus crashing the VFP IDE when loaded in DataEnvironment code editor of a Report.</li>
-  <li>Bad behavior in VFPA.</li>
+  <li>In VFPA it wouldn't focus on the Intellisense grid, so it it was not possible to select any option of the intellisense (Still with some other bugs, like the up and down arrow sometimes stops working in VFPA).</li>
   <li>The functions from my projects were not loading to the table of Foxcodeplus, because I would first copy the compiled PRGs to the TEMP folder of Windows with the extension of APP, and then I would "SET PROCEDURE TO" to the APPs. So, I tweaked it a little bit and got it working on my projects by making it also look in every folder that was set on "SET PATH TO". So, if a PRG was not located at the main folder, it would look through every other folder available in the "SET PATH TO"</li>
   <li>The Aliases of SQL Tables were not being added to the Intellisense in a Text To... EndText text block</li>
   <li>The Fields of the aliases of SQL Tables, were not being added to the Intellisense in a "Text To... EndText" text block. They would only appear if the user were to type the name of the table, an not its alias</li>
