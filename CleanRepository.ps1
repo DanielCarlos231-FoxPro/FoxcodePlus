@@ -22,8 +22,27 @@ elseif ($action -eq "r") {
     # Execute the rollback logic
     Write-Host "Performing rollback..."
     
+    # Define the path to the swap file
+    $swapFilePath = "$PWD\.git\.COMMIT_EDITMSG.swp"
+
+    # Check if the swap file exists
+    if (Test-Path $swapFilePath) {
+        # Prompt the user to confirm if the swap file should be deleted
+        $confirmDelete = Read-Host "A swap file exists. Do you want to delete it? (Y/N)"
+
+        if ($confirmDelete.ToLower() -eq "y") {
+            # Delete the swap file
+            Remove-Item $swapFilePath
+            Write-Host "Swap file deleted."
+        } else {
+            Write-Host "Please delete the swap file manually and rerun the script."
+            exit
+        }
+    }
+
     # Add your rollback code here
-    Invoke-Expression "git revert HEAD"
+    git revert --no-commit HEAD~3..
+    git commit -m "RollBack Commit"
 }
 else {
     # Invalid choice
