@@ -6,7 +6,7 @@
 **/teste/**
 **/testes/**
 
-#PowerShell Scripts
+# PowerShell Scripts
 *.ps1
 
 # use glob syntax.
