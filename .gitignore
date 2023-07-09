@@ -5,7 +5,6 @@
 **/test/**
 **/teste/**
 **/testes/**
-commitTeste
 
 # use glob syntax.
 syntax: glob
