@@ -6,6 +6,9 @@
 **/teste/**
 **/testes/**
 
+# VFP Project Explorer
+*_metadata.*
+
 # PowerShell Scripts
 *.ps1
 
