@@ -3,12 +3,15 @@ I am NOT the author of this project
 
 This is an open source project downloaded from <a href="https://github.com/VFPX/FoxcodePlus">VFPX\FoxCodePlus Repository</a>
 
+# Added Functionalities
 Since then I have added to this project the following functionalities
 * Auto-closing { } and () - It already had that working with " ", ' ' and [ ]
 * Showing variables stored in memory at run time - Before, it would show only the variables inside the current opened PRG.
 * Show Tables/Cursor fields that have been given another name in the SELECT 
 * Correction of some bugs like:
 * Now, when the user types an alias of a table in a VFP Select and then presses the dot, the IntelliSense opens with the list of fields belonging to that alias of the table.
+
+# Fixed Bugs
 <ol>
   <li>Foxcodeplus crashing the VFP IDE when loaded in DataEnvironment code editor of a Report.</li>
   <li>Bad behavior in VFPA.</li>
