@@ -34,7 +34,7 @@ elseif ($action -eq "r") {
     }
 
     # Rollback the commit
-    Invoke-Expression "git reset --soft HEAD~1.."
+    Invoke-Expression "git reset --soft HEAD~1"
     Invoke-Expression "git commit -m 'RollBack Commit'"
     Invoke-Expression "git push"
 
