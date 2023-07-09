@@ -23,8 +23,7 @@ elseif ($action -eq "r") {
     Write-Host "Performing rollback..."
     
     # Add your rollback code here
-    git revert --no-commit HEAD~3..
-    git commit -m "RollBack Commit"
+    Invoke-Expression "git revert HEAD"
 }
 else {
     # Invalid choice
