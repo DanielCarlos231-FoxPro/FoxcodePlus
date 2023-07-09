@@ -1,4 +1,4 @@
-# Removes all files and folder were added to the .gitIgnore file after it was pushed
+# Removes all files and folders were added to the .gitIgnore file after it was pushed
 
 git ls-files -i -c --exclude-from=.gitignore | %{git rm --cached $_}
 git add .
