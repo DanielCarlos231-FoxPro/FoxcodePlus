@@ -34,7 +34,7 @@ elseif ($action -eq "r") {
     }
 
     # Rollback the commit
-    git reset --soft HEAD~2
+    git reset --soft HEAD~3..
     git commit -m 'RollBack Commit'
     git push
 
