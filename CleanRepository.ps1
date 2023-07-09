@@ -36,6 +36,7 @@ elseif ($action -eq "r") {
     }
 
     # Rollback the commit
+    Write-Host "RollBack the commit..."
     git reset HEAD~1
     git commit -m 'RollBack Commit'
     git push
