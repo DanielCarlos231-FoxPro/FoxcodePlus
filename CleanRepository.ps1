@@ -19,11 +19,24 @@ if ($action -eq "p") {
 }
 elseif ($action -eq "r") {
     
-    # Execute the rollback logic
-    Write-Host "Performing rollback..."
-    
-    # Add your rollback code here
-    Invoke-Expression "git revert HEAD"
+
+    # Define the path to the swap file
+    $swapFilePath = "$PWD\.git\.COMMIT_EDITMSG.swp"
+
+    # Define the path to the swap file
+    $swapFilePath = "$PWD\.git\.COMMIT_EDITMSG.swp"
+
+    # Check if the swap file exists
+    if (Test-Path $swapFilePath) {
+        # Delete the swap file without prompting for confirmation
+        Remove-Item $swapFilePath -Force
+        Write-Host "Swap file deleted."
+    }
+
+    # Rollback the commit
+    Invoke-Expression "git revert --no-commit HEAD~3.."
+    Invoke-Expression "git commit -m 'RollBack Commit'"
+
 }
 else {
     # Invalid choice
