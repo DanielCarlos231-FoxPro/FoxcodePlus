@@ -1,12 +1,19 @@
 */--------------------------------------------------------------------------------------------------------
 */ DANIEL CARLOS ARAÚJO (DCA) 
-*/ FIX (DCA) - 26/06/2023 - nº (#000011) STATUS (EM TESTES)
+*/ FIX (DCA) - 09/07/2023 - nº (#000012) STATUS (OK)
+*/						  - Na procedure GetSqlTablesInCmd no IF o (" from " $ Lower(this.TextEndBlock) or " join " $ Lower(this.TextEndBlock) ) 
+*/						  - Estava sem o Lower(), -- (" from " $ this.TextEndBlock or " join " $ this.TextEndBlock ) -- 
+*/						  - Isso fazia com que os Alias da tabelas do SQL não fossem verificados		
+*/
+*/ FIX (DCA) - 26/06/2023 - nº (#000011) STATUS (OK)
 */						  - O método da classe FoxCodePlusIntellisense.AddItem estava causando erro 
 */ 						  - ao tentar inserir valores no __xfcpitems quando o cursor não existia
-*/ FIX (DCA) - 26/06/2023 - nº (#000010) STATUS (EM TESTES)
+*/
+*/ FIX (DCA) - 26/06/2023 - nº (#000010) STATUS (OK)
 */						  - Coloquei um NODEFAULT no foxcodeplusintellisense.tabs.tabpage1.items.mousedown
 */						  - Por quê mesmo com a procedure ignorando o Erro o FoxCodePlus fechava o VFP, com o NoDefault 
 */						  - parece que esse problema foi solucionado				
+*/
 */ NEW (DCA) - 25/06/2023 - nº (#000009) STATUS (EM TESTES)
 */						  - Alterei as funções que coletavam as Tabelas e o campos na conexão SGBD para
 */						  - Para pegar em todas as Conexões		
@@ -14,35 +21,40 @@
 */ NEW (DCA) - 24/06/2023 - nº (#000008) STATUS (EM TESTES)
 */						  - Adicionei a busca dos campos de um(a) Tabela/Cursor pelo o seu apelido 								
 */
-*/ NEW (DCA) - 24/06/2023 - nº (#000007) STATUS (EM TESTES)
+*/ NEW (DCA) - 24/06/2023 - nº (#000007) STATUS (OK)
 */						  - Adicionei nas propriedades Arrays de Objectos o [x] ou [x,y] dependendo da Array
 */						  - Adicionei o mesmo em variáveis Arrays 	
 */
-*/ NEW (DCA) - 26/02/2023 - nº (#000006) STATUS (EM TESTES)
+*/ NEW (DCA) - 26/02/2023 - nº (#000006) STATUS (OK)
 */						  -	Foi adicionado uma função GetConstantsRunTime() para poder pegar todas as veriávei em Run-Time	
 */ 						  -	Foi adicionado a busca com "m." nas variáveis em Run-Time	
 */
-*/ FIX (DCA) - 19/02/2023 - nº (#000000) STATUS (EM TESTES)
+*/ FIX (DCA) - 19/02/2023 - nº (#000005) STATUS (OK)
 */						  -	Não estava carregando todas as funções dos PRGs no SET("PROCEDURE")
 */						  -	A função GetFilePath() estava fazendo a verificação no caminho completo do SET("PRODECURE") e alguns PRGs
 */	 					  -	se encntravam em pastas diferentes das quais foram instaciadas.	
 */
-*/ FIX (DCA) - 12/02/2023 - nº (#000000) STATUS (EM TESTES)
+*/ FIX (DCA) - 12/02/2023 - nº (#000004) STATUS (OK)
 */						  -	Toda vez que abria O Report Designer e depos O DataEvironment do Report, se fosse acionado o FoxCodePlus, ao fechar o 
 */						  -	DataEnvironment e na sequência o Report Designer o VFP dava um Crash e fechava.
 */						  -	Para mais informações verificar a função ChkReportDesigner()							
 */
-*/ FIX (DCA) - 11/02/2023 - nº (#000000) STATUS (EM TESTES) 
+*/ ====> 	OBS: Se fechar o código do DataEnviroment e na sequência fechar o VFP, o código que foi escrito é encriptado
+*/				 Ver depois como corrigir isso!!
+*/		
+*/ FIX (DCA) - 11/02/2023 - nº (#000003) STATUS (OK) 
 */ 						  -	ESTAVA CAUSANDO UM ERRO NO VFP 10, CLICAVA PROGRAMATICAMENTE NA LINHA DE BAIXO 
-*/ 						  -	E ARRASTAVA ATÉ A MESMA POSIÇÃO QUE O CURSOR. O ERRO FOI CORRIGIDO NO this.foxcodeplus.Active() event			
+*/ 						  -	E ARRASTAVA ATÉ A MESMA POSIÇÃO QUE O CURSOR. O ERRO FOI CORRIGIDO NA MÉTODO FoxcodePlusIntellisense.Activate() event			
+*/
 */ ====>	OBS: ESSE ERRO ESTAVA OCORRENDO DEVIDO A UMA CORREÇÃO DE UM BUG NO MESMO EVENTO 
 */ 
-*/ FIX (DCA) - 28/12/2022 - nº (#000000) STATUS (OK)
+*/ NEW (DCA) - 28/12/2022 - nº (#000002) STATUS (OK)	
+*/						  -	Add auto close parentheses / curly braces 28/12/2022
+*/
+*/ FIX (DCA) - 27/12/2022 - nº (#000001) STATUS (OK)
 */						  -	Erro ao no "Error List" quando inicializa o FoxPro que ele está ativo nas configurações do IntelliSense
 */						  -	Find a better solution I simply used a TRY AND CATCH on ErrorList.Error in the ClassLib FoxCodePlusIntelliSense.VCX
 */
-*/ NEW (DCA) - 28/12/2022 - nº (#000001) STATUS (OK)	
-*/						  -	Add auto close parentheses / curly braces 28/12/2022
 */-------------------------------------------------/-------------------------------------------------------
 */
 */--------------------------------------------------------------------------------------------------------	
@@ -295,9 +307,7 @@ define class FoxCodePlusMain as custom
 	NoIntelliSense = ""								&&& comandos e funcoes que não devem ter IntelliSense do foxcodeplus
 	FoxcodeCore = .f.								&&& .T. indica que o IntelliSense do core do vfp esta aberto
 	HasDebugger = .f.								&&& .T. indica que o debug do vfp esta aberto
-	&& (DCA) - TESTE
-	HasReportOnTop = .f. &&& Verifica se o Report esta aberto em primeito nível	
-	&& (DCA) - TESTE
+	HasReportOnTop = .f. 							&&& (DCA) - 18/02/2023 - nº (#000004) - Verifica se o Report esta aberto em primeito nível	
 	HasSelectedItem = .f.							&&& controla inserçao do code snippet para comandos e funcoes
 	LoadScriptBoolean = .f.							&&& indica que o script "Boolean" do foxcode.dbf e foxcode.app deve ser executado
 	EditorSource = -1								&&& editor onde o IntelliSense esta aberto
@@ -342,7 +352,7 @@ define class FoxCodePlusMain as custom
 	chkErrorToolTip = "1" 
 	chkCodeSnippet = "1"
 	chkAutoCloseQuotes = "1"
-	chkAutoCloseParentheses = "1" && (DCA) - 28/12/2022 - nº (#000001)
+	chkAutoCloseParentheses = "1" && (DCA) - 28/12/2022 - nº (#000002)
 	cboSearch = "1"
 	chkMngDesignTime = "1"
 	cboDisplayCount = 10
@@ -377,7 +387,7 @@ define class FoxCodePlusMain as custom
 		this.chkErrorToolTip = strextract(lcSets,"<chkErrorToolTip>","</chkErrorToolTip>")
 		this.chkErrorListDockPos = int( val( strextract(lcSets,"<chkErrorListDockPos>","</chkErrorListDockPos>") ) )
 		this.chkAutoCloseQuotes = strextract(lcSets,"<chkAutoCloseQuotes>","</chkAutoCloseQuotes>")
-		this.chkAutoCloseParentheses = strextract(lcSets,"<chkAutoCloseParentheses>","</chkAutoCloseParentheses>") && (DCA) - 28/12/2022 - nº (#000001) AUTO CLOSE PARENTHESES AND CURLY BRACES 
+		this.chkAutoCloseParentheses = strextract(lcSets,"<chkAutoCloseParentheses>","</chkAutoCloseParentheses>") && (DCA) - 28/12/2022 - nº (#000002) AUTO CLOSE PARENTHESES AND CURLY BRACES 
 		this.cboSearch = strextract(lcSets,"<cboSearch>","</cboSearch>")
 		this.chkTFsql = strextract(lcSets,"<chkTFsql>","</chkTFsql>")
 		this.chkIncrTablesSql = strextract(lcSets,"<chkIncrTablesSql>","</chkIncrTablesSql>")
@@ -498,28 +508,13 @@ define class FoxCodePlusMain as custom
 			return 
 		endif
 		
-		&& (DCA) - 18/02/2023 -- EM TESTES
-	*	IF TYPE('this.IntelliSense.Showed') = 'L' AND NOT this.IntelliSense.Showed	
-	*		WAIT WINDOW "RETORNANDO" NOWAIT NOCLEAR	
-	*		this.IntelliSense.hide()
-	*		sys(2030,1)
-	*		return 
-	*	ELSE
-	*		WAIT WINDOW "PROSSEGUIR" NOWAIT NOCLEAR	
-	*	ENDIF
-		&& (DCA) - 18/02/2023 - TESTE
-		&& Em testes, gerou outro erro
-		&& FIX - (DCA) - 18/02/2023  -- EM TESTES
+		&& (DCA) - 18/02/2023 - nº (#000004)
 		&& PARA MAIS INFORMAÇÕES VERIFICAR A FUNÇÃO ChkReportDesigner()	
 		this.ChkReportDesigner() 
 		IF This.HasReportOnTop  
-		*	WAIT WINDOW IIF(this.IntelliSense.Showed,".T.",".F.")+TTOC(DATETIME()) NOWAIT NOCLEA 
-		*	if this.IntelliSense.Showed
-		 		this.IntelliSense.Showed = .F.  
-				this.IntelliSense.hide() 
-		*	endif
+		 	this.IntelliSense.Showed = .F.  
+			this.IntelliSense.hide() 
 		
-			
 			sys(2030,1)
 			return 
 		ENDIF
@@ -872,7 +867,7 @@ define class FoxCodePlusMain as custom
 				
 					keyboard '{leftarrow}'
 				
-				*** (DCA) - 28/12/2022 - nº (#000001) AUTO CLOSE PARENTHESIS AND CURLY BRACES 
+				*** (DCA) - 28/12/2022 - nº (#000002) AUTO CLOSE PARENTHESIS AND CURLY BRACES 
 				case inlist(this.LastKey,40,123) and this.chkAutoCloseParentheses = "1"					
 					DO case
 					case this.LastKey=40		&&- )
@@ -968,7 +963,7 @@ define class FoxCodePlusMain as custom
 
 		*- Não prossigo se nao foi possivel obter o Hwnd do editor corrente ou se existir uma tela filha do editor aberta com foco
 		*- ex: tela "Find" or "Go to line" and so on.
-		&& (dca) - 18/02/2023 - adicionei o this.HasReportOnTop para testes
+		&& (DCA) - 18/02/2023 - nº (#000004) - adicionei o this.HasReportOnTop para testes
 		if this.EditorHwnd <= 0 or (sys(2325,this.EditorHwnd) = this.EditorHwnd) or this.GetLineNo()=-1 OR this.HasReportOnTop
 		*	WAIT WIND "retuened at "+TTOC(DATETIME()) NOWAIT NOCLEAR 
 			return .f.
@@ -1035,7 +1030,7 @@ define class FoxCodePlusMain as custom
 	endproc 
 
 	*/*************************************************************************************************/*
-	*/ (DCA) + TESTES																				   /*		
+	*/ (DCA) - 18/02/2023 - nº (#000004) - (OK)																				   /*		
 	*/-------------------------------------------------------------------------------------------------/*
 	*/ Verficar se somente o Report Designer está aberto sem o DataEnvironment do Report.  	  		   /*
 	*/ Quando abria o Report Desiner e depois o DataEnvironment, se fosse acionado o FoxCodePlus e	   /*
@@ -1132,9 +1127,11 @@ define class FoxCodePlusMain as custom
 		unbindevents(hWnd, msg) 
 		sys(2030,1)
 		this.HasDebugger = .f.
-		&& (DCA) - 18/02/2023 - em testes
+		
+		&& (DCA) - 18/02/2023 - nº (#000004) 
 		This.HasReportOnTop = .f.
-		&& (DCA) - 18/02/2023 - em testes
+		&& (DCA) - 18/02/2023 - nº (#000004)
+	
 	endproc
 
 
@@ -7461,9 +7458,9 @@ define class FoxCodePlusMain as custom
 		*- verifico se o arquivo existe.
 		*- OBS: A funcao nativa File() verifica se o arquivo existe no diretorio corrente, 
 		*- caso nao encontre o arquivo faz a busca nas pastas informadas no SET PATH
-		if file(JUSTFNAME(plcFile)) OR; 	&& (DCA)	- 	19/02/2023 - ADICIONEI O JUSTFNAME() PARA TESTES, ATÉ O MOMENTO ESTÁ FUNCIONANDO 
-			FILE(plcFile) 						&& (DCA)	- 	20/02/2023 - ADICIONEI O FILE() SOZINHO, POR CAUSA DOS PRGs QUE NÃO SE ECONTRAN 
-													&&				DENTRO DE PASTAS DO SET("PATH")
+		if file(JUSTFNAME(plcFile)) OR; 	&& (DCA) - 19/02/2023 - nº (#000005) - ADICIONEI O JUSTFNAME()  
+			FILE(plcFile) 					&& (DCA) - 20/02/2023 - nº (#000005) - ADICIONEI O FILE() SOZINHO, POR CAUSA DOS PRGs QUE NÃO SE ECONTRAN 
+											&&									 - DENTRO DE PASTAS DO SET("PATH")
 																	
 			*- se informei o arquivo sem a pasta, entao faço a verificação pelo
 			*- SET PATH usando a função LOCFILE() para capturar o nome completo com a pasta.
@@ -7473,6 +7470,7 @@ define class FoxCodePlusMain as custom
 *!*				endif
 			
 			&&(DCA) - COLOQUEI ESSA VERIFICAÇÃO PARA PROCURAR SOMENTE OS PRGs QUE FOREM NECESSÁRIOS
+			
 			if !file(plcFile)
 				plcFile = locfile(plcFile,justext(plcFile),"FoxcodePlus Search")
 			endif
