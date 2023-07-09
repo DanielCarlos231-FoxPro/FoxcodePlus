@@ -30,8 +30,9 @@ elseif ($action -eq "r") {
         Write-Host "Swap file deleted."
     }
 
-    # Rollback the commit with a predefined commit message
-    Invoke-Expression "git revert --no-commit HEAD~3.. -m 'RollBack Commit'"
+    # Rollback the commit
+    Invoke-Expression "git revert --no-commit HEAD~3.."
+    Invoke-Expression "git commit -m 'RollBack Commit'"
 
 }
 else {
