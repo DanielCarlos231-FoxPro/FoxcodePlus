@@ -6,6 +6,9 @@
 **/teste/**
 **/testes/**
 
+# use glob syntax.
+syntax: glob
+
 # VFP Project Explorer
 *_metadata.*
 *_MetaData.*
@@ -13,9 +16,6 @@
 # PowerShell Scripts
 *.ps1
 *.PS1
-
-# use glob syntax.
-syntax: glob
 
 # VFP generated files
 *.err
