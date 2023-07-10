@@ -1,5 +1,18 @@
 */--------------------------------------------------------------------------------------------------------
 */ DANIEL CARLOS ARAÚJO (DCA) 
+*/ OBS 01: Tudo o que ainda não está sendo usado pode ser encontrado dando um Ctrl + F em (#000000)
+*/ 		   Estou aidionando isso comentado próximo a funções, variáveis e etc..., que não estão sendo usados ainda 
+*/ 
+*/ OBS 02: Se o FoxCodePlus apresentar algum comportamento estranho e não aparecer mensagem de erro 
+*/		   Verificar a Procedure Error, pois resolvi ignorar alguns erros. Talvêz seja necessário não ignorar os erros
+*/         para que possa pegar a mensagem de erro completa e entender o que está acontecendo para causar o comportamento indesejado
+*/
+*/ FIX (DCA) - 09/07/2023 - nº (#000013) STATUS (EM TESTES)
+*/						  - Quando fico deletando o ponto e digintando ele novamente muito rápido o Intellisense do FoxCodePlus gera um erro
+*/						  - Apesar de não ter uma situação em que o usuário precise ficar fazendo isso, tentei encontrar um tratamento 
+*/						  -	para está situação.
+*/	====> OBS: Isso só está ocorrendo quando o Intellisense tenta carregar o Campos de uma tabela/Alias dentro de um Text To... EndText
+*/
 */ FIX (DCA) - 09/07/2023 - nº (#000012) STATUS (OK)
 */						  - Na procedure GetSqlTablesInCmd no IF o (" from " $ Lower(this.TextEndBlock) or " join " $ Lower(this.TextEndBlock) ) 
 */						  - Estava sem o Lower(), -- (" from " $ this.TextEndBlock or " join " $ this.TextEndBlock ) -- 
@@ -768,22 +781,24 @@ define class FoxCodePlusMain as custom
 				lnLines = 0
 				if not this.IsTextEndText
 					*--- vfp intellisense ---*
-					lnLines = lnLines + this.GetFCs(this.LastWord)							&&- funcoes e comandos
+					lnLines = lnLines + this.GetFCs(this.LastWord)						&&- funcoes e comandos
 					lnLines = lnLines + this.GetCodeSnippets(this.LastWord)				&&- CodeSnippet
-					lnLines = lnLines + this.GetTablesUsed(this.LastWord)			 		&&- tabelas abertas em run-time
+					lnLines = lnLines + this.GetTablesUsed(this.LastWord)			 	&&- tabelas abertas em run-time
 					lnLines = lnLines + this.GetTablesDataEnvironment(this.LastWord)	&&- tabelas abertas em run-time
-					lnLines = lnLines + this.GetAPIs(this.LastWord)							&&- APIs em run-time
+					lnLines = lnLines + this.GetAPIs(this.LastWord)						&&- APIs em run-time
 					lnLines = lnLines + this.GetControls(this.LastWord)					&&- Objetos contidos em forms, classes e toolbar em write-time.
 					lnLines = lnLines + this.GetObjectsRunTime(this.LastWord)			&&- Objetos em memória em run-time
-					&& NEW (DCA) - 26/02/2023 - nº (#000006) STATUS (EM TESTES)
-					lnLines = lnLines + this.GetConstantsRunTime(this.LastWord)			&&- Constants na memória
-					&& NEW (DCA) - 26/02/2023 - nº (#000006) STATUS (EM TESTES)
+					lnLines = lnLines + this.GetConstantsRunTime(this.LastWord)			&&- NEW (DCA) - 26/02/2023 - nº (#000006) - Constants na memória
 					lnLines = lnLines + this.GetSetProcInfoPrgRunTime()					&&- Verifica os PRGs invocados pelo SET PROCEDURE TO em run-time.
-					lnLines = lnlines + this.GetProcInfo(0,1,.t.)							&&- funcoes, methodes, events, variables, cursors, tables, DLLs function and #defines em write-time
+					lnLines = lnlines + this.GetProcInfo(0,1,.t.)						&&- funcoes, methodes, events, variables, cursors, tables, DLLs function and #defines em write-time
 					
 				else
 					*--- sql intellisense ---*
-					if this.chkTFsql = "1" and this.IsSqlIntelliSense
+					&& (DCA) - 09/07/2023 - (#000013) - EM TESTES
+					if this.chkTFsql = "1" and this.IsSqlIntelliSense AND (!InList(this.LastKey,127,32) AND Right(Alltrim(this.LastWord),1) <> ".")
+					*if this.chkTFsql = "1" and this.IsSqlIntelliSense
+					&& (DCA) - 09/07/2023 - (#000013) - EM TESTES
+					
 						*- tabelas do SQL no modo incremental são verificadas somente se for uma instrucao "SELECT" ou qualquer outra com "WHERE"
 						*- 
 						if getwordnum(lower(this.TextEndBlock),1) == "select" or " where " $ lower(this.TextEndBlock)
@@ -818,6 +833,7 @@ define class FoxCodePlusMain as custom
 			
 			*- Apresento ou escondo o IntelliSense
 			if lnLines > 0
+				
 				with this.IntelliSense
 					*- se o IntelliSense ja esta com a tela aberta fecho-o... porem o parametro ".T."
 					*- significa que o seu conteudo permarecerá o mesmo.
@@ -834,7 +850,6 @@ define class FoxCodePlusMain as custom
 					_wSelect(this.EditorHwnd)
 
 					*- apresento o IntelliSense 
-					 
 					.show() 
 					
 				endwith
@@ -1995,7 +2010,7 @@ define class FoxCodePlusMain as custom
 
 
 	*/------------------------------------------------------------------------------------------------	
-	*/ (DCA) - busca nome do database que está conectado (ainda não está em uso)
+	*/ (DCA) - busca nome do database que está conectado (ainda não está em uso) - (#000000)
 	*/------------------------------------------------------------------------------------------------	
 	procedure GetDatabase
 		lparameters plcWord
@@ -2027,7 +2042,7 @@ define class FoxCodePlusMain as custom
 				lcAlias = alias()
 				LOCAL lnIdHandle
 				
-				lnIdHandle = 1
+		*		lnIdHandle = 1
 				DO WHILE lnIdHandle>0 AND lnIdHandle <= Alen(laCnx,1)
 				
 					If sqltables(laCnx[lnIdHandle],"TABLE",lcDatabases) = 1 
@@ -2098,8 +2113,8 @@ define class FoxCodePlusMain as custom
 				&& (DCA) - 25/06/2023 - nº #000009 - Get All Tables from ALL Connections
 				LOCAL lnIdHandle
 				
-				lnIdHandle = 1
-				DO WHILE lnIdHandle>0 AND lnIdHandle <= Alen(laCnx,1)
+		*		lnIdHandle = 1
+				FOR lnIdHandle = 1 TO Alen(laCnx,1)
 				
 					IF sqltables(laCnx[lnIdHandle],"TABLE",lcSqlTables) = 1 
 						
@@ -2126,8 +2141,8 @@ define class FoxCodePlusMain as custom
 						
 					ENDIF
 					
-					lnIdHandle = lnIdHandle + 1
-				ENDDO
+				*	lnIdHandle = lnIdHandle + 1
+				ENDFOR
 			
 *!*				select (lcSqlTables)
 *!*				scan 
@@ -2307,14 +2322,14 @@ define class FoxCodePlusMain as custom
 				&& (DCA) - 25/06/2023 - nº #000009 - Get All Field from ALL Connections
 				LOCAL lnIdHandle
 				
-				lnIdHandle = 1
-				DO WHILE lnIdHandle>0 AND lnIdHandle<=Alen(laCnx,1)
+			*	lnIdHandle = 1
+				FOR lnIdHandle = 1 TO Alen(laCnx,1)
 					IF sqlcolumns(laCnx[lnIdHandle], plcTable, "NATIVE", lcSqlFields) = 1
 						
 						select (lcSqlFields)
 						
 						IF Reccount(lcSqlFields) == 0
-							lnIdHandle = lnIdHandle + 1
+						*	lnIdHandle = lnIdHandle + 1
 							LOOP
 						ENDIF
 						
@@ -2342,9 +2357,9 @@ define class FoxCodePlusMain as custom
 						endscan
 						
 					ENDIF
-					
-					lnIdHandle = lnIdHandle + 1
-				ENDDO
+					 
+				*	lnIdHandle = lnIdHandle + 1
+				ENDFOR
 				
 				
 				
@@ -7524,7 +7539,13 @@ define class FoxCodePlusMain as custom
 		
 		*- desconsidero a apresentação desse erro, pois nao é um erro e sim um bug do vfp,
 		*- até porque nao existe codigo nesse metodo"
-		if lower(plcMethod) == "foxcodeplusintellisense.tabs.tabpage1.items.mousedown"
+		if lower(plcMethod) == "foxcodeplusintellisense.tabs.tabpage1.items.mousedown" OR; 
+		   'xxfcpwinapi_' $ lower(message())										   OR;
+		   'unknown member intellisense.' == lower(message()) 	&& (DCA) - 09/07/2023 - nº (#000013)
+		   														&& Quando fico digitando o ponto e apagando muito rápido, 
+		   														&& algumas funções do ToolTip não carregam a tempo... resolvi ignorar este tipo de erro
+		   														&& OBS: Isso só está ocorrendo quando o Intellisense tenta carregar o Campos 
+		   														&& de uma tabela/Alias dentro de um Text To... EndText
 			&&- do nothing
 			RETURN .F.
 		else
