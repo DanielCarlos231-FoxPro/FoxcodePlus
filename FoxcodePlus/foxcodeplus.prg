@@ -21,7 +21,7 @@
 */ ====> OBS: Ficou um pouco redundante pois a operação anterior já era para pegar o bloco por completo. 
 */			  Ver depois se tem como corrigir a operação anterior para não pegar o SubStr()			
 */	
-*/ FIX (DCA) - 15/07/2023 - n  (#000015) STATUS (Em Desenvolvimento) ????
+*/ FIX (DCA) - 15/07/2023 - n  (#000015) STATUS (EM TESTES) 
 */						  - Estou removendo a consulta em todas as tabelas dentro do "Select... From" de um "Text To... EntText", 
 */						  - pois o Intellisense está com um delay grande para mostrar informações que o Desenvolvedor provavelmente não vai usar
 */						  - Também irei colocar para que dentro do "Select... From" só apareca campos de tabelas que foram adicionadas
