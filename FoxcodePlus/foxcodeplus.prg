@@ -7,6 +7,27 @@
 */		   Verificar a Procedure Error, pois resolvi ignorar alguns erros. Talvêz seja necessário não ignorar os erros
 */         para que possa pegar a mensagem de erro completa e entender o que está acontecendo para causar o comportamento indesejado
 */
+*/ NEW (DCA) - 13/07/2023 - nº (#999999) STATUS	(Em Desenvolvimento)
+*/						  - Adidionando variável isDev, para indicar se está em Desenvolvimento ou Produção
+*/						  - Adicionando a variável oError para salvar o Erros de execução, por enquanto só usu em Try... ... Endtry
+*/
+*/ FIX (DCA) - 15/07/2023 - nº (#000016) STATUS (EM TESTES)
+*/						  - O Bloco de Texto do "Text to... EndText" não estava finalizando no lugar correto
+*/						  - Apenas reforcei com um Substr()
+*/ ====> OBS: Ficou um pouco redundante pois a operação anterior já era para pegar o bloco por completo. 
+*/			  Ver depois se tem como corrigir a operação anterior para não pegar o SubStr()			
+*/	
+*/ FIX (DCA) - 15/07/2023 - n  (#000015) STATUS (Em Desenvolvimento) ????
+*/						  - Estou removendo a consulta em todas as tabelas dentro do "Select... From" de um "Text To... EntText", 
+*/						  - pois o Intellisense está com um delay grande para mostrar informações que o Desenvolvedor provavelmente não vai usar
+*/						  - Também irei colocar para que dentro do "Select... From" só apareca campos de tabelas que foram adicionadas
+*/						  - dentro do "Text To... Endtext"		
+*/	
+*/ FIX (DCA) - 13/07/2023 - nº (#000014) STATUS (EM TESTES)
+*/						  -	FoxCodePlus Fecha e seleciona a linha de baixo até a posição atual do cursor dentro do Text To ... EndText ao clicar no "."
+*/						  - Erro ainda não resolvido
+*/ ====> OBS: Este erro não acontece sempre, estranhamente só estou conseguindo simular ele dentro do TESTS\CONV_FUNC.PRG
+*/									
 */ FIX (DCA) - 09/07/2023 - nº (#000013) STATUS (EM TESTES)
 */						  - Quando fico deletando o ponto e digintando ele novamente muito rápido o Intellisense do FoxCodePlus gera um erro
 */						  - Apesar de não ter uma situação em que o usuário precise ficar fazendo isso, tentei encontrar um tratamento 
@@ -372,7 +393,8 @@ define class FoxCodePlusMain as custom
 	chkTFsql = "1"									&&& SQL Server and others
 	chkIncrTablesSql = "1"							&&& SQL Server and others
 	chkIncrFieldsSql = "1"							&&& SQL Server and others
-
+	isDev = .T.										&&& (DCA) - 13/07/2023 - nº (#999999) - Indica se está em modo de Produção ou Desenvolvimento
+	oError = .f.									&&& (DCA) - 13/07/2023 - nº (#999999) - Guardar erros 
 		
 	*/------------------------------------------------------------------------------------------------	
 	*/ inicio o foxcodeplus
@@ -638,8 +660,17 @@ define class FoxCodePlusMain as custom
 			
 			this.CursorPos = _EdGetPos(this.EditorHwnd)
 			this.CursorLine = this.GetLineNo()
-				
+			
 			this.HasDot = iif("."$lcLastFullWord,.t.,.f.)
+			
+			&& (DCA) - 13/07/2023 - TESTES
+*!*				this.HasDot = (iif("."$lcLastFullWord,.t.,.f.) OR InList(this.lastkey,46)) 
+*!*				
+*!*				IF this.HasDot AND Right(Alltrim(lcLastWord),1) <> "."
+*!*					lcLastWord = lcLastWord + "."
+*!*				ENDIF
+			&& (DCA) - 13/07/2023 - TESTES
+			
 			this.LastWord = lcLastWord
 			
 			*- se estou dentro de uma string ou dentro de um Text...EndText nao abro o IntelliSense
@@ -755,9 +786,9 @@ define class FoxCodePlusMain as custom
 				endif				
 			endif	
 			
-			*- sempre escondo o IntelliSense antes de reabri-lo.
+			*- sempre escondo o IntelliSense antes de reabri-lo.			
 			*- faço isso para limpar a lista e executar outros comandos que estão dentro no method hide.
-			if not this.HasDot
+			if not this.HasDot 
 				this.IntelliSense.hide()
 
 				*- 1 to 9 ... prevendo erros de sintax quando palavras iniciadas por numero
@@ -765,6 +796,8 @@ define class FoxCodePlusMain as custom
 				if isdigit(this.LastWord)   &&between(asc(substr(this.LastWord,1,1)), 48, 57)
 					return
 				endif
+				
+				*- tabelas do SQL no modo incremental são verificadas somente se for uma instrucao "SELECT" ou qualquer outra com "WHERE"
 				
 				*- se o caracter atual for " " espaço escondo o IntelliSense ao pressionar backspace
 				if this.LastKey=127
@@ -795,20 +828,30 @@ define class FoxCodePlusMain as custom
 				else
 					*--- sql intellisense ---*
 					&& (DCA) - 09/07/2023 - (#000013) - EM TESTES
-					if this.chkTFsql = "1" and this.IsSqlIntelliSense AND (!InList(this.LastKey,127,32) AND Right(Alltrim(this.LastWord),1) <> ".")
+					if this.chkTFsql = "1" and this.IsSqlIntelliSense AND (!InList(this.LastKey,127,32) ) && AND Right(Alltrim(this.LastWord),1) <> "." 
 					*if this.chkTFsql = "1" and this.IsSqlIntelliSense
 					&& (DCA) - 09/07/2023 - (#000013) - EM TESTES
-					
-						*- tabelas do SQL no modo incremental são verificadas somente se for uma instrucao "SELECT" ou qualquer outra com "WHERE"
+						
+						&& (DCA) - 14/07/2023 - nº (#000014)
+						&& Se a última tecla for o "." devo voltar, pois está travando as Teclas do 
+						&& Teclado que é usado para selecionar os itens no Grid do FoxCodePlus.
+						&& Outro motivo é o método GotDot() já é para ter pego todos os Campos das Tabelas
+						If this.LastKey = 46
+						*	Set Console OFF 
+						*	Set Step On  
+							Return 
+						ENDIF
+						&& (DCA) - 14/07/2023 - nº (#000014)
+						
 						*- 
-						if getwordnum(lower(this.TextEndBlock),1) == "select" or " where " $ lower(this.TextEndBlock)
+						if getwordnum(lower(this.TextEndBlock),1) == "select" or " where " $ lower(this.TextEndBlock) 
 							local array laCnx[1]
 							
-							if this.chkIncrTablesSql = "1"
-							*	WAIT WIND Textmerge("<<this.LastWord>> <<Datetime()>>") NOWAIT NoClear
+							if this.chkIncrTablesSql = "1" 
 							
 								lnLines = lnLines + this.GetSqlTables(this.LastWord, .t., .t.)				&&- tabelas no SQL	 	
 								lnLines = lnLines + this.GetSqlTablesInCmd(this.LastWord, 2, .t., .f.)		&&- alias no instruncao SQL
+							
 							else
 								*- tabelas e alias existentes na select-sql
 								lnLines = lnLines + this.GetSqlTablesInCmd(this.LastWord, 0, .t., .f.)		&&- tabelas e alias no instruncao SQL
@@ -816,9 +859,10 @@ define class FoxCodePlusMain as custom
 						endif	
 
 						*- Todos os campos das tabelas e alias incluidas no instruncao SQL no modo incremental
-						if this.chkIncrFieldsSql = "1"
-							lnLines = lnLines + this.GetSqlFieldsInAllTablesCmd()						
-						endif
+						if this.chkIncrFieldsSql = "1" 
+							lnLines = lnLines + this.GetSqlFieldsInAllTablesCmd()
+						EndIf
+						
 					endif
 				endif					
 			else
@@ -854,7 +898,7 @@ define class FoxCodePlusMain as custom
 					
 				endwith
 
-			else
+			ELSE
 				this.IntelliSense.hide()
 			endif
 
@@ -1002,9 +1046,14 @@ define class FoxCodePlusMain as custom
 		local array laEditorSets[25]
 		try 
 			_EdGetEnv(this.EditorHwnd, @laEditorSets)
-		catch
+		CATCH 
 			laEditorSets[25] = -1
 			this.EditorFileName = ""
+			
+			IF This.isDev
+				SET STEP ON
+			ENDIF
+			
 		endtry
 		
 		this.EditorFileName = alltrim(laEditorSets[1])
@@ -1195,8 +1244,13 @@ define class FoxCodePlusMain as custom
 			else
 				lnLineNo = 0
 			endif 
-		catch 	
+		CATCH  	
 			lnLineNo = -1
+			
+			IF This.isDev
+				SET STEP ON
+			ENDIF
+			
 		endtry 
 		
 		return lnLineNo
@@ -1219,6 +1273,12 @@ define class FoxCodePlusMain as custom
 			lcString = _EdGetStr(this.EditorHwnd, lnStartPos, lnEndPos)
 		catch 
 			lcString = ""
+			
+			IF this.isDev
+				SET STEP ON 
+			ENDIF
+			
+			
 		endtry 	
 		
 		Return lcString
@@ -1374,7 +1434,7 @@ define class FoxCodePlusMain as custom
 
 		*- dentro de IntelliSense com conteudo do SQL só fecho e não seleciono se pressionei space
 		*- se eu navegar nas opcoes com as setas UP e DOWN e pressionar space, neste caso a opcao pode ser selecionada com space.
-		if this.IsTextEndText and this.IsSqlIntelliSense and plnKeyAscii = 32 and not this.IntelliSense.ManualChoice
+		if this.IsTextEndText and this.IsSqlIntelliSense and plnKeyAscii = 32 and not this.IntelliSense.ManualChoice		
 			this.IntelliSense.hide()	
 			this.IsSqlIntelliSense = .f.
 			keyboard chr(32)
@@ -1831,6 +1891,11 @@ define class FoxCodePlusMain as custom
 		llhasCursor = .f.
 		plcLastWord = Lower(Strtran(plcLastWord,".",""))
 	
+		&& Para não fazer nada se não estiver marcado para verificar Tables e Fields - 12/07/2023
+		if this.chkTF <> "1"		&& foxcodeplus.ini
+			return lcAlias
+		endif
+	
 		*- pego a texto da linha corrente que estou digitando até a posicao do cursor
 		local lcText, lnLineNo
 		lnLineNo = this.GetLineNo()
@@ -2073,7 +2138,10 @@ define class FoxCodePlusMain as custom
 					select (lcAlias)
 				endif
 			endif
-		Catch  
+		CATCH  
+			IF this.isDev
+				SET STEP ON 
+			ENDIF
 		Endtry
 		
 		*/-----------------------------------------/*
@@ -2090,10 +2158,23 @@ define class FoxCodePlusMain as custom
 		local array laCnx[1]
 		
 		set console off
-	
+		
 		if this.chkTFsql <> "1"
 			return 0
 		endif 
+		
+		&& (DCA) - 15/07/2023 - n (#000015)
+		&& Não quero que apareca as tabelas dentro de um select... from, só quero Alias e Campos 
+		&& Está muito pesado a o Intellisense
+		IF 	NOT (plcWord $ Substr(Lower(this.TextEndBlock),At("select",Lower(this.TextEndBlock)),At("from",Lower(this.TextEndBlock)) + 1)) AND;
+			NOT InList(Lower(plcWord),"from","select")																				  AND;
+			NOT Empty(plcWord)
+			
+		*	Wait Wind plcWord+" $ "+ Substr(Lower(this.TextEndBlock),At("select",Lower(this.TextEndBlock)),At("from",Lower(this.TextEndBlock)) + 1) NoWait NOCLEA
+		*	Set Step On 
+			Return 0
+		ENDIF
+		&& (DCA) - 15/07/2023 - TESTE
 		
 		if pllClearArray
 			declare this.ItemsTables[1,2]
@@ -2113,7 +2194,6 @@ define class FoxCodePlusMain as custom
 				&& (DCA) - 25/06/2023 - nº #000009 - Get All Tables from ALL Connections
 				LOCAL lnIdHandle
 				
-		*		lnIdHandle = 1
 				FOR lnIdHandle = 1 TO Alen(laCnx,1)
 				
 					IF sqltables(laCnx[lnIdHandle],"TABLE",lcSqlTables) = 1 
@@ -2140,8 +2220,6 @@ define class FoxCodePlusMain as custom
 
 						
 					ENDIF
-					
-				*	lnIdHandle = lnIdHandle + 1
 				ENDFOR
 			
 *!*				select (lcSqlTables)
@@ -2172,6 +2250,11 @@ define class FoxCodePlusMain as custom
 				endif
 			endif
 		CATCH 
+		
+			IF this.isDev
+				SET STEP ON 
+			ENDIF
+		
 		ENDTRY
 		
 	
@@ -2206,7 +2289,14 @@ define class FoxCodePlusMain as custom
 		
 		*- Se nao estou conectado forço o intellisense a trabalhar com Tables and Alias
 		plnMode= iif(plnMode=2 and asqlhandles(laCnx) <= 0, 0, plnMode) 				
-
+		
+		&& (DCA) - 15/07/223 - TEESTE
+	*	If NOT Empty(this.TextEndBlock) 
+	*		_cliptext = this.TextEndBlock 
+	*		Set Step On  
+	*	ENDIF
+		&& (DCA) - 15/07/223 - TEESTE
+	
 		*- valido somente para select, insert, update and delete		
 		if	( getwordnum(lower(this.TextEndBlock),1) == "select" and (" from " $ Lower(this.TextEndBlock) or " join " $ Lower(this.TextEndBlock) ) ) or;
 			( getwordnum(lower(this.TextEndBlock),1) == "insert" and getwordnum(lower(this.TextEndBlock),2) == "into" ) or;
@@ -2311,7 +2401,7 @@ define class FoxCodePlusMain as custom
 		if this.chkTFsql <> "1"
 			return 0
 		endif 
-		
+			
 		lnItemsFound = 0
 		lcSqlFields = "tmp"+sys(2015)
 
@@ -2322,14 +2412,12 @@ define class FoxCodePlusMain as custom
 				&& (DCA) - 25/06/2023 - nº #000009 - Get All Field from ALL Connections
 				LOCAL lnIdHandle
 				
-			*	lnIdHandle = 1
 				FOR lnIdHandle = 1 TO Alen(laCnx,1)
 					IF sqlcolumns(laCnx[lnIdHandle], plcTable, "NATIVE", lcSqlFields) = 1
 						
 						select (lcSqlFields)
 						
 						IF Reccount(lcSqlFields) == 0
-						*	lnIdHandle = lnIdHandle + 1
 							LOOP
 						ENDIF
 						
@@ -2358,7 +2446,6 @@ define class FoxCodePlusMain as custom
 						
 					ENDIF
 					 
-				*	lnIdHandle = lnIdHandle + 1
 				ENDFOR
 				
 				
@@ -2393,7 +2480,12 @@ define class FoxCodePlusMain as custom
 					select (lcAlias)
 				endif
 			endif
-		catch
+		CATCH 
+		
+			IF this.isDev
+				SET STEP ON 
+			ENDIF
+			
 		endtry
 				
 		return lnItemsFound
@@ -2416,12 +2508,12 @@ define class FoxCodePlusMain as custom
 		if lnLines = 0
 			return 0
 		endif
-
+			
 		* obtenho os campos de todas as tabelas contidas na select
 		lnItemsFound = 0
 		for lnx = 1 to lnLines
 			lnItemsFound = lnItemsFound + this.GetSqlFields(this.ItemsTables[lnx,1])
-		endfor 
+		endfor  
 		
 		return lnItemsFound
 	endproc 
@@ -2729,6 +2821,11 @@ define class FoxCodePlusMain as custom
 				amembers(laMembersX, pluObjClass, plnMode)
 			endif
 		catch 
+		
+			IF this.isDev
+				SET STEP ON 
+			ENDIF
+			
 		endtry	
 
 
@@ -3537,6 +3634,11 @@ define class FoxCodePlusMain as custom
 			catch to loException
 				this.ShowErrorWriteTime(1747, justfname(upper(plcFileVcx)) ) 	&&- class file doesn't exist
 				llFileOk = .f.
+				
+				IF this.isDev
+					SET STEP ON 
+				ENDIF
+			
 			endtry 
 
 			if not llFileOk					&&- Arquivo corrompido ou invalido
@@ -5048,9 +5150,14 @@ define class FoxCodePlusMain as custom
 						lcCaption = alltrim(evaluate("loControl."+laObjects[lnx]+".caption"))
 						lcToolTip = lcToolTip + chr(13) + "Caption: "+iif(len(lcCaption)>40, substr(lcCaption,1,40)+"...", lcCaption)
 					endif
-				catch
+				CATCH 
 					lcControlName = laObjects[lnx]
 					lcToolTip = ""
+				
+					IF this.isDev
+						SET STEP ON 
+					ENDIF
+				
 				endtry 
 
 				this.AddItem(lcControlName, 13, lcToolTip)
@@ -5130,8 +5237,13 @@ define class FoxCodePlusMain as custom
 					lcToolTip = "Object " + lower(laObjects[lnx]) + " Class " + &laObjects[lnx]..class + chr(13) +;
 					            "BaseClass: " + &laObjects[lnx]..baseclass + chr(13) +;
 					            "ClassLibrary: " + iif(empty(&laObjects[lnx]..classlibrary), "(None)", &laObjects[lnx]..ClassLibrary)
-				catch
+				CATCH 
 					lcTooltip = "Object " + lower(laObjects[lnx]) 
+				
+					IF this.isDev
+						SET STEP ON 
+					ENDIF
+				
 				endtry
 				
 				lcTooltip = lcTooltip + chr(13) + chr(13) + "This is an object instantiated in memory (at run-time)"
@@ -5282,6 +5394,11 @@ define class FoxCodePlusMain as custom
 						This error ocurred when generating the ToolTip for the variable
 						Error: <<objErr.message>>
 					ENDTEXT
+				
+					IF this.isDev
+						SET STEP ON 
+					ENDIF
+				
 				ENDTRY
 				
 				&& Add name and image to the array that will add to IntelliSense
@@ -5434,11 +5551,16 @@ define class FoxCodePlusMain as custom
 				lcActiveClass = loCurrentObject.baseclass
 				lnSelStart    = loCurrentObject.selstart
 				llReadOnly    = loCurrentObject.readonly
-			catch
+			CATCH 
 				loCurrentObject = .null.
 				lcActiveClass = ""
 				lnSelStart = 0
 				llReadOnly = .f.
+		
+				IF this.isDev
+					SET STEP ON 
+				ENDIF
+
 			endtry 
 
 			*- se for um objeto do vfp faço tratamento do "."
@@ -5496,7 +5618,7 @@ define class FoxCodePlusMain as custom
 			else
 				keyboard "." plain
 			endif
-
+			
 			llReturn = .f. 
 		endif 	
 
@@ -5560,14 +5682,15 @@ define class FoxCodePlusMain as custom
 						endif	
 						
 						*- capturo os campos da tabela SQL
-						this.IncrementalResult = .f.
+						this.IncrementalResult = .f. 
 						lnLines = this.GetSqlFields(lcSqlTable)
 						this.IncrementalResult = .t.
-
+						
 						llSqlFields = iif(lnLines>0, .t., .f.)
 					endif
 
 					_edInsert(this.EditorHwnd, ".", 1)
+					
 					llReturn = .f.
 				endif
 			endif
@@ -5577,6 +5700,7 @@ define class FoxCodePlusMain as custom
 		*- se o IntelliSense do foxcodeplus estiver aberto e pressiono "." seleciono o item da lista.
 		*- valido somente se for membros de um objeto ou campos de uma tabela.
 		if llReturn
+			
 			if this.IntelliSense.Showed
 				if inlist(this.IntelliSense.ActiveImage, 1,3,4,5,6,7,8,9,10,11,13,14,15,16,20) 
 					this.SelectItem(0)
@@ -5693,7 +5817,7 @@ define class FoxCodePlusMain as custom
 		if llReturn		
 			this.IntelliSense.Found = .f.
 			lnLines = 0
-
+			
 			do case 
 			
 				*------------ dentro de um "WITH...ENDWITH" ------------*
@@ -5730,8 +5854,13 @@ define class FoxCodePlusMain as custom
 											loTempObj = createobject("TempOleClass",this.ControlOleClass)
 											lnLines = this.GetMembers(loTempObj.xOleControl,.t.,.t.)
 											loTempObj = .null.
-										catch
+										CATCH 
 											lnLines = 0
+										
+											IF this.isDev
+												SET STEP ON 
+											ENDIF
+										
 										endtry 
 									endif
 								
@@ -5842,8 +5971,13 @@ define class FoxCodePlusMain as custom
 								loTempObj = createobject("TempOleClass",this.ControlOleClass)
 								lnLines = this.GetMembers(loTempObj.xOleControl,.t.,.t.)
 								loTempObj = .null.
-							catch
+							CATCH 
 								lnLines = 0
+								
+								IF this.isDev
+									SET STEP ON 
+								ENDIF
+				
 							endtry 
 						endif
 					endif
@@ -5928,6 +6062,11 @@ define class FoxCodePlusMain as custom
 									select (lcAlias)
 								endif 
 							catch 
+								
+								IF this.isDev
+									SET STEP ON 
+								ENDIF
+								
 							endtry
 							
 						*- obtenho os campos
@@ -5940,7 +6079,12 @@ define class FoxCodePlusMain as custom
 								if used(lcAlias)
 									select (lcAlias)
 								endif
-							catch				
+							CATCH 
+								
+								IF this.isDev
+									SET STEP ON 
+								ENDIF
+												
 							endtry	
 						endif
 					endif
@@ -5948,13 +6092,25 @@ define class FoxCodePlusMain as custom
 					this.IncrementalResult = .t.
 			endcase
 		endif
-
+		
 		if (llReturn or llSqlFields) and lnLines > 0
 			this.IntelliSense.LastFind = ""
 			this.IntelliSense.Find(this.LastWord)
 			this.IntelliSense.show()
+		*		WAIT WINDOW Ttoc(Datetim()) 									+ Chr(13)+Chr(10); 
+							+ " llReturn = "	+ Iif(llReturn	,".T.",".F.")	+ Chr(13)+Chr(10); 
+							+ " llSqlFields = "	+ Iif(llSqlFields,".T.",".F.") 	+ Chr(13)+Chr(10);
+							+ " lnLines = "		+ Alltrim(Str(lnLines,10)) 		+ Chr(13)+Chr(10);
+							NOWAIT NOCLEAR
+			
 		else
 			if this.IntelliSense.Showed
+				&&& aqui 12/07/2023 
+			*	WAIT WINDOW Ttoc(Datetim()) 									+ Chr(13)+Chr(10); 
+							+ " llReturn = "	+ Iif(llReturn	,".T.",".F.")	+ Chr(13)+Chr(10); 
+							+ " llSqlFields = "	+ Iif(llSqlFields,".T.",".F.") 	+ Chr(13)+Chr(10);
+							+ " lnLines = "		+ Alltrim(Str(lnLines,10)) 		+ Chr(13)+Chr(10);
+							NOWAIT NOCLEAR
 				this.IntelliSense.hide()
 			endif
 		endif 	
@@ -5973,11 +6129,76 @@ define class FoxCodePlusMain as custom
 		endif 
 			
 		set message to lcSetMessage	
-
+						
 		return llReturn
 	endproc 
 
+	
+	*/-----------------------------------------------------------------
+	*/ (DCA) - 13/07/2023 - Teste
+	*/-----------------------------------------------------------------
+	PROTECTED PROCEDURE RestoreKeyBoard
+		*- devolvo os atributos do teclado 
+		local lc_onkey_uparrow, lc_onkey_dnarrow, lc_onkey_pgup, lc_onkey_pgdn, lc_onkey_esc,;
+			  lc_onkey_tab, lc_onkey_enter, lc_onkey_spacebar, lc_onkey_openpar, lc_onkey_closepar, lc_onkey_f1,;
+		      lc_onkey_plus, lc_onkey_minus, lc_onkey_opentag, lc_onkey_closetag, lc_onkey_hash, lc_onkey_comma,;
+		      lc_onkey_times, lc_onkey_slash
+		
+		
+		
+		lc_onkey_uparrow  = on("key","UPARROW")
+		lc_onkey_dnarrow  = on("key","DNARROW")
+		lc_onkey_pgup     = on("key","PGUP")
+		lc_onkey_pgdn     = on("key","PGDN")
+		lc_onkey_esc      = on("key","ESC")
+		lc_onkey_tab      = on("key","ENTER")
+		lc_onkey_enter    = on("key","TAB")
+		lc_onkey_spacebar = on("key","SPACEBAR")
+		lc_onkey_openpar  = on("key","(")
+		lc_onkey_closepar = on("key",")")
+		lc_onkey_plus     = on("key","+")
+		lc_onkey_minus    = on("key","-")
+		lc_onkey_opentag  = on("key","<")
+		lc_onkey_closetag = on("key",">")
+		lc_onkey_comma    = on("key",",")
+		lc_onkey_hash	  = on("key","#")
+		lc_onkey_times	  = on("key","*")
+		lc_onkey_slash	  = on("key","/")
+		lc_onkey_f1		  = on("key","F1")
 
+		on key label UPARROW  &lc_onkey_uparrow
+		on key label DNARROW  &lc_onkey_dnarrow
+		on key label PGUP 	  &lc_onkey_pgup
+		on key label PGDN 	  &lc_onkey_pgdn
+		on key label ESC 	  &lc_onkey_esc
+		on key label TAB      &lc_onkey_tab
+		on key label ENTER    &lc_onkey_enter
+		on key label SPACEBAR &lc_onkey_spacebar
+		on key label (        &lc_onkey_openpar
+		on key label )        &lc_onkey_closepar
+		on key label "+"      &&lc_onkey_plus
+		on key label "-"      &&lc_onkey_minus
+		on key label "<"      &&lc_onkey_opentag
+		on key label ">"      &&lc_onkey_closetag
+		on key label ","	  &lc_onkey_comma
+		on key label "#"	  &lc_onkey_hash
+		on key label "*"	  &lc_onkey_times
+		on key label "/"   	  &&lc_onkey_slash
+		on key label F1		  &lc_onkey_f1
+		on key label CTRL+W   
+		on key label CTRL+E   
+
+		*- devolvo algumas configurações do ambiente
+	*	if this.SaveSetEscape = "ON"
+			set escape on
+	*	endif	
+
+	*	if this.SaveSetTalk = "ON"
+			set talk on
+	*	endif
+
+	ENDPROC
+	
 	*/------------------------------------------------------------------------------------------------	
 	*/ Identifica se uma variavel tem um objeto instanciado em write-time.
 	*/ atraves das funcoes "-createobject()", "createobjectex()" or "newobject()"
@@ -6093,7 +6314,11 @@ define class FoxCodePlusMain as custom
 							lnLines = this.GetMembers(loTempObj.xObj,.t.,.t.)
 							loTempObj = .null.
 							loTempSubObj = .null.
-						catch				
+						CATCH 
+								
+							IF this.isDev
+								SET STEP ON 
+							ENDIF				
 						endtry	
 					
 					*- se nao for uma classe nativa e nao tem o nome do arquivo
@@ -6312,11 +6537,15 @@ define class FoxCodePlusMain as custom
 				lcActiveClass = loCurrentObject.baseclass
 				lnSelStart    = loCurrentObject.selstart
 				llReadOnly    = loCurrentObject.readonly				
-			catch
+			CATCH 
 				loCurrentObject = .null.
 				lcActiveClass = ""
 				lnSelStart = 0
 				llReadOnly = .f.
+						
+				IF this.isDev
+					SET STEP ON 
+				ENDIF
 			endtry
 
 			*- se for um objeto do vfp faço tratamento do "."
@@ -6387,8 +6616,13 @@ define class FoxCodePlusMain as custom
 					otherwise 
 						loControl = createobject("empty")
 					endcase 
-				catch
+				CATCH 
 					loControl = createobject("empty")
+							
+					IF this.isDev
+						SET STEP ON 
+					ENDIF
+					
 				endtry
 			endif
 
@@ -6421,7 +6655,12 @@ define class FoxCodePlusMain as custom
 
 		try
 			this.CursorPos = _EdGetPos(this.EditorHwnd)
-		catch
+		CATCH 
+								
+			IF this.isDev
+				SET STEP ON 
+			ENDIF
+			
 		endtry
 		
 		*- retorno a configuracao do ambiente
@@ -7207,7 +7446,7 @@ define class FoxCodePlusMain as custom
 	
 	
 	*** <summary>
-	***	(DCA) - 27/06/2023 - Functions returns whether current editor position is at a location within Parentheses  
+	***	(DCA) - 27/06/2023 - Functions returns whether current editor position is at a location within Parentheses   nº #000000
 	*** </summary>
 	*** <param name="plcText">Last Word</param>
 	*** <remarks></remarks>
@@ -7292,6 +7531,11 @@ define class FoxCodePlusMain as custom
 					if lnLineEndText > 0
 						this.TextEndBlock = this.GetText(lnLineStartText, lnLineEndText-2)
 						this.TextEndBlock = strtran(strtran(this.TextEndBlock, chr(13)+chr(10), " "), chr(9), " ")
+						&& (DCA) - 15/07/2023 - FIX nº (#000016)
+						If At("endt", Lower(this.TextEndBlock))>0
+							this.TextEndBlock = Alltrim(Substr(this.TextEndBlock,1, At("endt", Lower(this.TextEndBlock)) -1 ))  
+						ENDIF
+						&& (DCA) - 15/07/2023 - FIX nº (#000016)
 					endif	
 
 					*- verifico se é uma instrucao SQL (somente para database conectado ex: MS SQL Server)
@@ -7521,7 +7765,12 @@ define class FoxCodePlusMain as custom
 		on key label "="
 		try 
 			erase (this.TmpFile)
-		catch
+		CATCH 
+								
+			IF this.isDev
+				SET STEP ON 
+			ENDIF
+			
 		endtry 
 		set message to ""
 	endproc 
@@ -7539,9 +7788,12 @@ define class FoxCodePlusMain as custom
 		
 		*- desconsidero a apresentação desse erro, pois nao é um erro e sim um bug do vfp,
 		*- até porque nao existe codigo nesse metodo"
+		
+		&& 'unknown member intellisense.' == lower(message()) - Havia colocado este tipo de erro para o Intellisense ignorar
+		&& Mas estou deixando ele ocorrer novamente, para ver se existe um tratamento para ele, pois após ele ococrrer 
+		&& aparentemente o FoxCodePlus não funciona direito
 		if lower(plcMethod) == "foxcodeplusintellisense.tabs.tabpage1.items.mousedown" OR; 
-		   'xxfcpwinapi_' $ lower(message())										   OR;
-		   'unknown member intellisense.' == lower(message()) 	&& (DCA) - 09/07/2023 - nº (#000013)
+		   'xxfcpwinapi_' $ lower(message())					&& (DCA) - 09/07/2023 - nº (#000013)
 		   														&& Quando fico digitando o ponto e apagando muito rápido, 
 		   														&& algumas funções do ToolTip não carregam a tempo... resolvi ignorar este tipo de erro
 		   														&& OBS: Isso só está ocorrendo quando o Intellisense tenta carregar o Campos 
