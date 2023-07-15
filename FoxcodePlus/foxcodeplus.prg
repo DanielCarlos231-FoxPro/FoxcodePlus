@@ -11,6 +11,10 @@
 */						  - Adidionando variável isDev, para indicar se está em Desenvolvimento ou Produção
 */						  - Adicionando a variável oError para salvar o Erros de execução, por enquanto só usu em Try... ... Endtry
 */
+*/ NEW (DCA) - 15/07/2023 - nº (#000017) STATUS (EM TESTE)
+*/						  - Adiionei uma propriedad This.HasDoubleDot para poder identificar quando o usuário digitar ponto duplo
+*/						  - Irei usar ela juntamento com o this.IsTextEndText para pagar as tabelas de um banco específico 
+*/	
 */ FIX (DCA) - 15/07/2023 - nº (#000016) STATUS (EM TESTES)
 */						  - O Bloco de Texto do "Text to... EndText" não estava finalizando no lugar correto
 */						  - Apenas reforcei com um Substr()
@@ -333,6 +337,7 @@ define class FoxCodePlusMain as custom
 	TextLine2 = ""									&&& texto da linha corrente (anterior a modificacao)
 	WordCount = 0									&&& total de palavras na linha corrente
 	LastWord = ""									&&& ultima palavra da linha atual (da posicao do ponteiro)
+	LastFullWord = ""								&&& Última palavra completa
 	LastKey = 0										&&& ultima tecla pressionada
 	CursorPos = 0									&&& posicao corrente dentro do texto 
 	CursorLine = 0									&&& linha atual onde o cursor esta posicionado
@@ -360,6 +365,7 @@ define class FoxCodePlusMain as custom
 	CommandCase = ""								&&& upper, lower or proper to the vfp commands 
 	FunctionCase = ""								&&& upper, lower or proper to the vfp functions
 	HasDot = .f.									&&& indica se tem ou não "." na linha capturada
+	HasDoubleDot = .f.								&&& Indica se a palavra tem dois ponto
 	IsComment = .f.									&&&	indica que a linha capturada é um comentario
 	IsTextEndText = .f.								&&& .T. indica que esta dentro um bloco TEXT...ENDTEXT
 	TextEndBlock = ""								&&& bloco de todo o texto do TEXT...ENDTEXT posicionado
@@ -393,7 +399,7 @@ define class FoxCodePlusMain as custom
 	chkTFsql = "1"									&&& SQL Server and others
 	chkIncrTablesSql = "1"							&&& SQL Server and others
 	chkIncrFieldsSql = "1"							&&& SQL Server and others
-	isDev = .T.										&&& (DCA) - 13/07/2023 - nº (#999999) - Indica se está em modo de Produção ou Desenvolvimento
+	isDev = .f.										&&& (DCA) - 13/07/2023 - nº (#999999) - Indica se está em modo de Produção ou Desenvolvimento
 	oError = .f.									&&& (DCA) - 13/07/2023 - nº (#999999) - Guardar erros 
 		
 	*/------------------------------------------------------------------------------------------------	
@@ -662,16 +668,10 @@ define class FoxCodePlusMain as custom
 			this.CursorLine = this.GetLineNo()
 			
 			this.HasDot = iif("."$lcLastFullWord,.t.,.f.)
-			
-			&& (DCA) - 13/07/2023 - TESTES
-*!*				this.HasDot = (iif("."$lcLastFullWord,.t.,.f.) OR InList(this.lastkey,46)) 
-*!*				
-*!*				IF this.HasDot AND Right(Alltrim(lcLastWord),1) <> "."
-*!*					lcLastWord = lcLastWord + "."
-*!*				ENDIF
-			&& (DCA) - 13/07/2023 - TESTES
+			this.HasDoubleDot = iif(".."$lcLastFullWord,.t.,.f.) AND Occurs(".",lcLastFullWord) == 2 
 			
 			this.LastWord = lcLastWord
+			this.LastFullWord = Alltrim(lcLastFullWord)
 			
 			*- se estou dentro de uma string ou dentro de um Text...EndText nao abro o IntelliSense
 			if lastkey() <> 46
@@ -681,7 +681,6 @@ define class FoxCodePlusMain as custom
 					this.IsTextEndText = this.GetTextEndText(lcText)	
 				endif
 			ENDIF
-			
 			
 			*- especifics behaviors for some keys
 			if not this.IsTextEndText
@@ -758,15 +757,18 @@ define class FoxCodePlusMain as custom
 				endif
 				
 				return 					
-			else
+			Else
+			 
 				*- estou dentro de um text..endtext, é uma instrucao SQL e pressionei space ao lado das clausulas abaixo
 				*- neste caso nao abro o intellisense incremental pois ira abrir o intellisense do foxcode.app
-				if this.IsTextEndText and this.IsSqlIntelliSense and ;
+				&& (DCA) - 15/07/2023 - Adicionei o This.lastKey == 32, apesar do comentário 
+				&& acima mencionar que para entrar no IF somente quando precionar o espaço, este IF não tinha isso
+				if this.IsTextEndText and this.IsSqlIntelliSense and This.lastKey == 32 and ;
 					( ;
 						inlist(lower(getwordnum(lcText,lnWordCount-1)), "from", "join", "into", "update") or ;
 						inlist(lower(getwordnum(lcText,lnWordCount-2)), "from", "join", "into", "update") ;
 					)
-					
+										
 					if this.TextLine <> lcText
 						this.IntelliSense.Find(lcLastWord)
 					endif
@@ -774,8 +776,8 @@ define class FoxCodePlusMain as custom
 					if this.IntelliSense.Showed
 						this.IntelliSense.hide()
 					endif	
-
-					return
+					
+					Return
 				
 				*- prossigo com a checagem para abertura do intellisense incremental
 				else
@@ -788,7 +790,7 @@ define class FoxCodePlusMain as custom
 			
 			*- sempre escondo o IntelliSense antes de reabri-lo.			
 			*- faço isso para limpar a lista e executar outros comandos que estão dentro no method hide.
-			if not this.HasDot 
+			if not this.HasDot or this.HasDoubleDot && (DCA) - 15/07/2023 - nº (#000017) - Adicionei a this.HasDoubleDot 
 				this.IntelliSense.hide()
 
 				*- 1 to 9 ... prevendo erros de sintax quando palavras iniciadas por numero
@@ -828,28 +830,43 @@ define class FoxCodePlusMain as custom
 				else
 					*--- sql intellisense ---*
 					&& (DCA) - 09/07/2023 - (#000013) - EM TESTES
-					if this.chkTFsql = "1" and this.IsSqlIntelliSense AND (!InList(this.LastKey,127,32) ) && AND Right(Alltrim(this.LastWord),1) <> "." 
+					if this.chkTFsql = "1" and this.IsSqlIntelliSense AND (!InList(this.LastKey,127,32) ) 
+						
 					*if this.chkTFsql = "1" and this.IsSqlIntelliSense
 					&& (DCA) - 09/07/2023 - (#000013) - EM TESTES
+					
+						&& (DCA) - 15/07/2023 - nº (#000017)
+						Local lcDataBase
+						lcDataBase = ""
+						If this.HasDoubleDot
+							   
+							lcDataBase = Substr(This.LastFullWord,1,At("..",This.LastFullWord)-1)
+							
+							this.IncrementalResult =  !Empty(this.LastWord)
+							lnLines = lnLines + this.GetSqlTables(this.LastWord, .t., .t.,lcDataBase)				&&- tabelas no SQL
+							this.IncrementalResult =  .t.
+						EndIf
+						&& (DCA) - 15/07/2023 - nº (#000017)
 						
 						&& (DCA) - 14/07/2023 - nº (#000014)
 						&& Se a última tecla for o "." devo voltar, pois está travando as Teclas do 
 						&& Teclado que é usado para selecionar os itens no Grid do FoxCodePlus.
-						&& Outro motivo é o método GotDot() já é para ter pego todos os Campos das Tabelas
-						If this.LastKey = 46
-						*	Set Console OFF 
-						*	Set Step On  
+						&& Outro motivo é o método GetDot() já é para ter pego todos os Campos das Tabelas
+						If this.LastKey = 46 and not this.HasDoubleDot
 							Return 
 						ENDIF
 						&& (DCA) - 14/07/2023 - nº (#000014)
 						
 						*- 
-						if getwordnum(lower(this.TextEndBlock),1) == "select" or " where " $ lower(this.TextEndBlock) 
+						if (getwordnum(lower(this.TextEndBlock),1) == "select" or " where " $ lower(this.TextEndBlock)) ;
+						   and not this.HasDoubleDot && (DCA) - 15/07/2023 - nº (#000017) - Adicionei o this.HasDoubleDot
+							
 							local array laCnx[1]
 							
 							if this.chkIncrTablesSql = "1" 
-							
-								lnLines = lnLines + this.GetSqlTables(this.LastWord, .t., .t.)				&&- tabelas no SQL	 	
+								
+								lnLines = lnLines + this.GetSQLDatabases(this.LastWord, .t., .t.)			&&- (DCA) - 15/07/2023 - nº (#000000) - Databases no SQL
+								lnLines = lnLines + this.GetSqlTables(this.LastWord, .t., .t.)				&&- tabelas no SQL
 								lnLines = lnLines + this.GetSqlTablesInCmd(this.LastWord, 2, .t., .f.)		&&- alias no instruncao SQL
 							
 							else
@@ -859,7 +876,8 @@ define class FoxCodePlusMain as custom
 						endif	
 
 						*- Todos os campos das tabelas e alias incluidas no instruncao SQL no modo incremental
-						if this.chkIncrFieldsSql = "1" 
+						&& (DCA) - 15/07/2023 - nº (#000017) - Adicionei o this.HasDoubleDot
+						if this.chkIncrFieldsSql = "1" and not this.HasDoubleDot
 							lnLines = lnLines + this.GetSqlFieldsInAllTablesCmd()
 						EndIf
 						
@@ -908,7 +926,7 @@ define class FoxCodePlusMain as custom
 		*- nenhuma das teclas validas para chamada da lista de itens,
 		*- então trato outras funcionalidades 
 		else
-
+				
 			*- inicio tratamentos de navegação do IntelliSense sem o foco no mesmo
 			do case 
 				*- se abrir aspas, aspas simples ou colchetes, é fechado automaticamente.
@@ -2077,17 +2095,24 @@ define class FoxCodePlusMain as custom
 	*/------------------------------------------------------------------------------------------------	
 	*/ (DCA) - busca nome do database que está conectado (ainda não está em uso) - (#000000)
 	*/------------------------------------------------------------------------------------------------	
-	procedure GetDatabase
-		lparameters plcWord
-		, pllAdd, pllClearArray
-		local lnItemsFound, lcAlias, lcToolTip, lcDatabases, lnItemsCnt
+	procedure GetSQLDatabases
+		lparameters plcWord, pllAdd, pllClearArray
+		local lnItemsFound, lcAlias, lcToolTip, lcDatabases, lnItemsCnt, lcSubTextBlock
 		local array laCnx[1]
 		
 		set console off
-	
+		
 		if this.chkTFsql <> "1"
 			return 0
 		endif 
+		
+		lcSubTextBlock = Substr(Lower(this.TextEndBlock),At("select",Lower(this.TextEndBlock)),At("from",Lower(this.TextEndBlock)) + 1)
+		lcSubTextBlock = Chrtran(lcSubTextBlock,","," ")
+		For lnSubTBlock = 1 to GetWordCount(lcSubTextBlock)
+			If Lower(plcWord) == GetWordNum(lcSubTextBlock,lnSubTBlock)
+				Return 0
+			endif
+		endfor
 		
 		if pllClearArray
 			declare this.ItemsTables[1,2]
@@ -2108,8 +2133,8 @@ define class FoxCodePlusMain as custom
 				LOCAL lnIdHandle
 				
 		*		lnIdHandle = 1
-				DO WHILE lnIdHandle>0 AND lnIdHandle <= Alen(laCnx,1)
-				
+				For lnIdHandle = 1 to Alen(laCnx,1)	
+		*		DO WHILE lnIdHandle>0 AND lnIdHandle <= Alen(laCnx,1)
 					If sqltables(laCnx[lnIdHandle],"TABLE",lcDatabases) = 1 
 					
 						Select (lcDatabases)
@@ -2118,11 +2143,22 @@ define class FoxCodePlusMain as custom
 						Select (lcDatabases)
 						Go Top
 						scan 
-							if this.ChkIncremental(plcWord, Table_cat)
+							
+							if this.ChkIncremental(plcWord, Table_cat) and Lower(Alltrim(Table_schem)) <> "sys"
 								lnItemsFound = lnItemsFound + 1
-							
-							
+						
+								lcToolTip = "Database " + alltrim(Table_cat)+"."+alltrim(Table_schem)
+							*	if not empty(nvl(Remarks,""))
+							*		lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
+							*	endif	
 								
+								dimension this.ItemsTables[lnItemsCnt+lnItemsFound,2]
+								this.ItemsTables[lnItemsCnt+lnItemsFound,1] = alltrim(Table_cat)
+								this.ItemsTables[lnItemsCnt+lnItemsFound,2] = alltrim(lcToolTip)
+								
+								if pllAdd					
+									this.AddItem(alltrim(Table_cat), 16, lcToolTip)
+								endif
 							
 							endif
 						endscan
@@ -2130,8 +2166,9 @@ define class FoxCodePlusMain as custom
 					
 					Endif
 				
-					lnIdHandle = lnIdHandle + 1
-				Enddo	
+				*	lnIdHandle = lnIdHandle + 1
+			*	Enddo	
+				EndFor
 				
 				use in &lcDatabases
 				if used(lcAlias)
@@ -2153,11 +2190,9 @@ define class FoxCodePlusMain as custom
 	*/ Busca as tabelas do database SGBD - SQL
 	*/------------------------------------------------------------------------------------------------	
 	procedure GetSqlTables
-		lparameters plcWord, pllAdd, pllClearArray
-		local lnItemsFound, lcAlias, lcToolTip, lcSqlTables, lnItemsCnt
+		lparameters plcWord, pllAdd, pllClearArray, plcDataBase
+		local lnItemsFound, lcAlias, lcToolTip, lcSqlTables, lnItemsCnt, lcSubTextBlock, lnSubTBlock, lcDataBase
 		local array laCnx[1]
-		
-		set console off
 		
 		if this.chkTFsql <> "1"
 			return 0
@@ -2166,14 +2201,14 @@ define class FoxCodePlusMain as custom
 		&& (DCA) - 15/07/2023 - n (#000015)
 		&& Não quero que apareca as tabelas dentro de um select... from, só quero Alias e Campos 
 		&& Está muito pesado a o Intellisense
-		IF 	NOT (plcWord $ Substr(Lower(this.TextEndBlock),At("select",Lower(this.TextEndBlock)),At("from",Lower(this.TextEndBlock)) + 1)) AND;
-			NOT InList(Lower(plcWord),"from","select")																				  AND;
-			NOT Empty(plcWord)
-			
-		*	Wait Wind plcWord+" $ "+ Substr(Lower(this.TextEndBlock),At("select",Lower(this.TextEndBlock)),At("from",Lower(this.TextEndBlock)) + 1) NoWait NOCLEA
-		*	Set Step On 
-			Return 0
-		ENDIF
+		lcSubTextBlock = Substr(Lower(this.TextEndBlock),At("select",Lower(this.TextEndBlock)),At("from",Lower(this.TextEndBlock)) + 1)
+		lcSubTextBlock = Chrtran(lcSubTextBlock,","," ")
+		
+		For lnSubTBlock = 1 to GetWordCount(lcSubTextBlock)
+			If Lower(plcWord) == GetWordNum(lcSubTextBlock,lnSubTBlock)
+				Return 0
+			endif
+		endfor
 		&& (DCA) - 15/07/2023 - TESTE
 		
 		if pllClearArray
@@ -2181,6 +2216,9 @@ define class FoxCodePlusMain as custom
 			this.ItemsTables[1,1] = ""
 			this.ItemsTables[1,2] = ""
 		endif	
+		
+		lcDataBase = Iif(Type('plcDataBase') == 'C',Alltrim(plcDataBase),"")
+		
 		
 		lnItemsFound = 0
 		lnItemsCnt = iif(empty(this.ItemsTables[1,1]), 0, alen(this.ItemsTables,1))
@@ -2200,9 +2238,19 @@ define class FoxCodePlusMain as custom
 						
 						select (lcSqlTables)
 						scan 
-							if this.ChkIncremental(plcWord, table_name)
-								lnItemsFound = lnItemsFound + 1
+							If not Empty(lcDataBase) and Lower(lcDataBase) <> Lower(Alltrim(table_cat))
+								loop
+							EndIf
+							
+							&& (DCA) - 15/07/2023 - TESTES
+						*	If NOT Empty(lcDataBase)
+							*	Set Step On  
+						*	EndIf
+							&& (DCA) - 15/07/2023 - TESTES
 								
+							if this.ChkIncremental(plcWord, table_name)
+								
+								lnItemsFound = lnItemsFound + 1
 								lcToolTip = "Table " + alltrim(table_cat)+"."+alltrim(Table_schem)+"."+alltrim(Table_name)
 								if not empty(nvl(Remarks,""))
 									lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
@@ -5651,7 +5699,7 @@ define class FoxCodePlusMain as custom
 			else
 				*- se estou dentro de um Text...EndText e for uma instrução SQL (MS Sql Server or another database)
 				*- abro o IntelliSense com os campos do SQL
-				if this.GetTextEndText(lcText)
+				if this.GetTextEndText(lcText) 
 					if this.IsSqlIntelliSense and not inlist(lower(getwordnum(lcText,getwordcount(lcText)-1)), "from", "join", "into", "update") and not inlist(lower(getwordnum(lcText,getwordcount(lcText)-2)), "from", "join", "into", "update") and not empty(right(this.GetTextLine(),1))
 						*- selecionei pressionando "." com o intellisense aberto	
 						if this.IntelliSense.Showed

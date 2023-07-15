@@ -1247,7 +1247,8 @@ procedure FoxCodePlus
 					lnCountTables = 0
 
 					.IncrementalResult = .f.
-					lnCountTables = .GetSqlTables("", .f., .t.)								&&- tabelas no SQL	 	
+					lnCountTables = .GetSQLDatabases("", .f., .t.)							&&- (DCA) - 15/07/2023 - nº (#000000) - Databases no SQL
+					lnCountTables = lnCountTables + .GetSqlTables("", .f., .f.)				&&- tabelas no SQL	 	
 					lnCountTables = lnCountTables + .GetSqlTablesInCmd("", 2, .f., .f.)		&&- alias no instruncao SQL
 					.IncrementalResult = .t.
 					
