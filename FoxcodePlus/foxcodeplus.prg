@@ -1203,7 +1203,10 @@ define class FoxCodePlusMain as custom
 		*!*	Windows Server 2003	    5.2	    	     5		2	
 		*!*	Windows XP	            5.1	    	     5		1	
 		*!*	Windows 2000	        5.0	    	     5		0	
-		*!*	* For applications that have been manifested for Windows 8.1 or Windows 10. Applications not manifested for Windows 8.1 or Windows 10 will return the Windows 8 OS version value (6.2). To manifest your applications for Windows 8.1 or Windows 10, refer to Targeting your application for Windows.
+		*!*	* For applications that have been manifested for Windows 8.1 or Windows 10. 
+		*!* * Applications not manifested for Windows 8.1 or Windows 10 will return the 
+		*1* * Windows 8 OS version value (6.2). To manifest your applications for Windows 8.1 
+		*!* * or Windows 10, refer to Targeting your application for Windows.
 
 		LOCAL lcOS, lcOsVersionInfo, lcReturn, lcVersion, lnBuild, lnMajor, lnMinor, lnPlatformId, lnRet, lnSize
 
