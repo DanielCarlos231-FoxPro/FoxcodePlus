@@ -1,49 +1,56 @@
 */--------------------------------------------------------------------------------------------------------
 */ DANIEL CARLOS ARAÚJO (DCA) 
 */ OBS 01: Tudo o que ainda não está sendo usado pode ser encontrado dando um Ctrl + F em (#000000)
-*/ 		   Estou aidionando isso comentado próximo a funções, variáveis e etc..., que não estão sendo usados ainda 
+*/ 		   Estou adicionando isso comentado próximo a funções, variáveis e etc..., que não estão sendo usados ainda 
 */ 
 */ OBS 02: Se o FoxCodePlus apresentar algum comportamento estranho e não aparecer mensagem de erro 
 */		   Verificar a Procedure Error, pois resolvi ignorar alguns erros. Talvêz seja necessário não ignorar os erros
 */         para que possa pegar a mensagem de erro completa e entender o que está acontecendo para causar o comportamento indesejado
 */
-*/ NEW (DCA) - 16/07/2023 - nº (#000019) - STATUS (EM TESTES)
-*/						  - Adicionei a Procedure GetWinVersion() ao FoxCodePlus. 
-*/						  - Estarei usando essa Procedure no lugar do OS(), pois ela não funciona no Windows 10
-*/
-*/ FIX (DCA) - 16/07/2023 - nº (#000018) - STATUS (EM TESTES)
-*/						  - Adicionei o Método GetWinVersion no componente FoxCodePlusIntellisense da Classe FoxCodePlusIntellisense.vcx
-*/						  - A função OS() do VFP usada dentro do Activate do mesmo componente não funciona corretamente no Windows 10
-*/
 */ NEW (DCA) - 13/07/2023 - nº (#999999) STATUS	(Em Desenvolvimento)
 */						  - Adidionando variável isDev, para indicar se está em Desenvolvimento ou Produção
 */						  - Adicionando a variável oError para salvar o Erros de execução, por enquanto só usu em Try... ... Endtry
 */
-*/ NEW (DCA) - 15/07/2023 - nº (#000017) STATUS (EM TESTE)
+*/ FIX (DCA) - 13/04/2024 - nº (#000021) - STATUS (OK)
+*/						  - Erro ao montar toolTip para tabelas do FireBird		
+*/
+*/ NEW (DCA) - 23/10/2023 - nº (#000020) - STATUS (OK)
+*/						  - Tabbed Docking with Command window
+*/
+*/ NEW (DCA) - 16/07/2023 - nº (#000019) - STATUS (OK)
+*/						  - Adicionei a Procedure GetWinVersion() ao FoxCodePlus. 
+*/						  - Estarei usando essa Procedure no lugar do OS(), pois ela não funciona no Windows 10
+*/
+*/ FIX (DCA) - 16/07/2023 - nº (#000018) - STATUS (OK)
+*/						  - Adicionei o Método GetWinVersion no componente FoxCodePlusIntellisense da Classe FoxCodePlusIntellisense.vcx
+*/						  - A função OS() do VFP usada dentro do Activate do mesmo componente não funciona corretamente no Windows 10
+*/
+*/ NEW (DCA) - 15/07/2023 - nº (#000017) STATUS (OK)
 */						  - Adiionei uma propriedad This.HasDoubleDot para poder identificar quando o usuário digitar ponto duplo
 */						  - Irei usar ela juntamento com o this.IsTextEndText para pagar as tabelas de um banco específico 
 */	
-*/ FIX (DCA) - 15/07/2023 - nº (#000016) STATUS (EM TESTES)
+*/ FIX (DCA) - 15/07/2023 - nº (#000016) STATUS (OK)
 */						  - O Bloco de Texto do "Text to... EndText" não estava finalizando no lugar correto
 */						  - Apenas reforcei com um Substr()
 */ ====> OBS: Ficou um pouco redundante pois a operação anterior já era para pegar o bloco por completo. 
 */			  Ver depois se tem como corrigir a operação anterior para não pegar o SubStr()			
 */	
-*/ FIX (DCA) - 15/07/2023 - n  (#000015) STATUS (EM TESTES) 
+*/ FIX (DCA) - 15/07/2023 - n  (#000015) STATUS (OK) 
 */						  - Estou removendo a consulta em todas as tabelas dentro do "Select... From" de um "Text To... EntText", 
 */						  - pois o Intellisense está com um delay grande para mostrar informações que o Desenvolvedor provavelmente não vai usar
 */						  - Também irei colocar para que dentro do "Select... From" só apareca campos de tabelas que foram adicionadas
 */						  - dentro do "Text To... Endtext"		
 */	
-*/ FIX (DCA) - 13/07/2023 - nº (#000014) STATUS (EM TESTES)
+*/ FIX (DCA) - 13/07/2023 - nº (#000014) STATUS (OK)
 */						  -	FoxCodePlus Fecha e seleciona a linha de baixo até a posição atual do cursor dentro do Text To ... EndText ao clicar no "."
-*/						  - Erro ainda não resolvido
+*/
 */ ====> OBS: Este erro não acontece sempre, estranhamente só estou conseguindo simular ele dentro do TESTS\CONV_FUNC.PRG
 */									
 */ FIX (DCA) - 09/07/2023 - nº (#000013) STATUS (OK)
 */						  - Quando fico deletando o ponto e digintando ele novamente muito rápido o Intellisense do FoxCodePlus gera um erro
 */						  - Apesar de não ter uma situação em que o usuário precise ficar fazendo isso, tentei encontrar um tratamento 
 */						  -	para está situação.
+*/
 */	====> OBS: Isso só está ocorrendo quando o Intellisense tenta carregar o Campos de uma tabela/Alias dentro de um Text To... EndText
 */
 */ FIX (DCA) - 09/07/2023 - nº (#000012) STATUS (OK)
@@ -386,6 +393,10 @@ define class FoxCodePlusMain as custom
 	dimension ItemsCodeSnippets[1,2]				&&& Itens definidos no foxcode.dbf	
 	dimension FoxcodeFunctions[1]					&&& Funcoes contidas no foxcode.dbf
 	
+	&& (DCA) - 23/07/2023 - TESTE
+	SelectedText = ""
+	&& (DCA) - 23/07/2023 - TESTE
+	
 	*- used in foxcodeplus.ini
 	chkFC = "1"
 	chkTF = "1"
@@ -440,8 +451,8 @@ define class FoxCodePlusMain as custom
 		this.cboSearch = strextract(lcSets,"<cboSearch>","</cboSearch>")
 		this.chkTFsql = strextract(lcSets,"<chkTFsql>","</chkTFsql>")
 		this.chkIncrTablesSql = strextract(lcSets,"<chkIncrTablesSql>","</chkIncrTablesSql>")
-		this.chkIncrFieldsSql = strextract(lcSets,"<chkIncrFieldsSql>","</chkIncrFieldsSql>")
-
+		this.chkIncrFieldsSql = strextract(lcSets,"<chkIncrFieldsSql>","</chkIncrFieldsSql>")	
+	
 		*- objeto que apresenta o IntelliSense
 		this.IntelliSense = newobject("FoxCodePlusIntelliSense","FoxCodePlusIntelliSense.vcx")
 
@@ -455,7 +466,7 @@ define class FoxCodePlusMain as custom
 		this.EditorToolTip = newobject("ToolTip","FoxCodeToolTip.fxp")
 
 		*- apresenta os erros em write-time
-		if this.chkErrorList = "1" 
+		if this.chkErrorList = "1"
 			this.ShowErrorList()
 		endif
 		
@@ -672,6 +683,18 @@ define class FoxCodePlusMain as custom
 			lcCommand2 = getwordnum(lcText,2)
 			lcCommand3 = getwordnum(lcText,3)
 			
+			&& (DCA) - 23/07/2023 - TESTE
+*!*				Local lc_cliptext, lcTextSelect
+*!*				lc_cliptext = _cliptext
+*!*				_EdCopy(this.EditorHwnd)
+*!*				lcTextSelect = _cliptext
+*!*				_cliptext = lc_cliptext
+*!*				This.SelectedText = lcTextSelect 
+*!*				If NOT Empty(This.SelectedText)
+*!*					WAIT Window This.SelectedText NoWait NoClear
+*!*				ENDIF
+			&& (DCA) - 23/07/2023 - TESTE
+			
 			this.CursorPos = _EdGetPos(this.EditorHwnd)
 			this.CursorLine = this.GetLineNo()
 			
@@ -766,7 +789,7 @@ define class FoxCodePlusMain as custom
 				
 				return 					
 			Else
-			 
+			
 				*- estou dentro de um text..endtext, é uma instrucao SQL e pressionei space ao lado das clausulas abaixo
 				*- neste caso nao abro o intellisense incremental pois ira abrir o intellisense do foxcode.app
 				&& (DCA) - 15/07/2023 - Adicionei o This.lastKey == 32, apesar do comentário 
@@ -776,14 +799,14 @@ define class FoxCodePlusMain as custom
 						inlist(lower(getwordnum(lcText,lnWordCount-1)), "from", "join", "into", "update") or ;
 						inlist(lower(getwordnum(lcText,lnWordCount-2)), "from", "join", "into", "update") ;
 					)
-										
+						
 					if this.TextLine <> lcText
 						this.IntelliSense.Find(lcLastWord)
 					endif
 
 					if this.IntelliSense.Showed
 						this.IntelliSense.hide()
-					endif	
+					endif
 					
 					Return
 				
@@ -954,12 +977,27 @@ define class FoxCodePlusMain as custom
 				
 				*** (DCA) - 28/12/2022 - nº (#000002) AUTO CLOSE PARENTHESIS AND CURLY BRACES 
 				case inlist(this.LastKey,40,123) and this.chkAutoCloseParentheses = "1"					
+					
+					&& (DCA) - 23/07/2023 - Teste  
+				*	WAIT Window This.SelectedText NoWait NoClear
+*!*						Local lc_cliptext, lcTextSelect
+*!*						lc_cliptext = _cliptext
+*!*						_EdCopy(this.EditorHwnd)
+*!*						lcTextSelect = _cliptext
+*!*					*	lcTextSelected = iif(substr(lcTextSelected,1,1)="[", stuff(lcTextSelected,1,1,"("), lcTextSelected)
+*!*					*	lcTextSelected = iif(right(lcTextSelected,1)="]", stuff(lcTextSelected,len(lcTextSelected),1,")"), lcTextSelected)
+*!*				
+*!*						Wait Wind lcTextSelect NoWait NoClear
+*!*						_cliptext = lc_cliptext 
+					&& (DCA) - 23/07/2023 - Teste 
+					
 					DO case
 					case this.LastKey=40		&&- )
 						
 					*	IF ascan(this.FoxcodeFunctions, chrtran(This.lastWord,"()",""), -1,-1, 1, 15) == 0
-							keyboard '){leftarrow}'		
+					*		keyboard '){leftarrow}'		
 					*	ENDif
+						
 						
 					case this.LastKey=123		&&- } 
 						keyboard "{RBRACE}{leftarrow}"		
@@ -2348,7 +2386,6 @@ define class FoxCodePlusMain as custom
 		
 		lcDataBase = Iif(Type('plcDataBase') == 'C',Alltrim(plcDataBase),"")
 		
-		
 		lnItemsFound = 0
 		lnItemsCnt = iif(empty(this.ItemsTables[1,1]), 0, alen(this.ItemsTables,1))
 		lcSqlTables = "tmp"+sys(2015)
@@ -2365,10 +2402,14 @@ define class FoxCodePlusMain as custom
 				
 					IF sqltables(laCnx[lnIdHandle],"TABLE",lcSqlTables) = 1 
 						
-						select (lcSqlTables)
+						Select (lcSqlTables)
 						scan 
-							If not Empty(lcDataBase) and Lower(lcDataBase) <> Lower(Alltrim(table_cat))
+							If not Empty(lcDataBase) and Lower(lcDataBase) <> Lower(Alltrim(table_cat)) 
 								loop
+							EndIf
+							
+							If not Empty(lcDataBase) and Empty(Nvl(table_cat,''))
+								Loop 
 							EndIf
 							
 							&& (DCA) - 15/07/2023 - TESTES
@@ -2380,7 +2421,7 @@ define class FoxCodePlusMain as custom
 							if this.ChkIncremental(plcWord, table_name)
 								
 								lnItemsFound = lnItemsFound + 1
-								lcToolTip = "Table " + alltrim(table_cat)+"."+alltrim(Table_schem)+"."+alltrim(Table_name)
+								lcToolTip = "Table " + Nvl(Alltrim(table_cat)+".","") + Nvl(Alltrim(Table_schem)+".","") + alltrim(Table_name)
 								if not empty(nvl(Remarks,""))
 									lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
 								endif	
@@ -2450,7 +2491,7 @@ define class FoxCodePlusMain as custom
 		local lcWord, lcSelect, lnx, lcSqlAlias, lcSqlTable, lnItemsFound, lnItemsCnt
 	
 		set console off
-
+		
 		if this.chkTFsql <> "1"
 			return 0
 		endif 
@@ -2466,14 +2507,7 @@ define class FoxCodePlusMain as custom
 		
 		*- Se nao estou conectado forço o intellisense a trabalhar com Tables and Alias
 		plnMode= iif(plnMode=2 and asqlhandles(laCnx) <= 0, 0, plnMode) 				
-		
-		&& (DCA) - 15/07/223 - TEESTE
-	*	If NOT Empty(this.TextEndBlock) 
-	*		_cliptext = this.TextEndBlock 
-	*		Set Step On  
-	*	ENDIF
-		&& (DCA) - 15/07/223 - TEESTE
-	
+			
 		*- valido somente para select, insert, update and delete		
 		if	( getwordnum(lower(this.TextEndBlock),1) == "select" and (" from " $ Lower(this.TextEndBlock) or " join " $ Lower(this.TextEndBlock) ) ) or;
 			( getwordnum(lower(this.TextEndBlock),1) == "insert" and getwordnum(lower(this.TextEndBlock),2) == "into" ) or;
@@ -2615,7 +2649,7 @@ define class FoxCodePlusMain as custom
 									lcToolTip = lcToolTip + chr(13) + alltrim(Remarks)
 								endif	
 								
-								lcToolTip = lcToolTip + chr(13) + "Table " + alltrim(table_cat)+"."+alltrim(Table_schem)+"."+alltrim(Table_name)
+								lcToolTip = lcToolTip + chr(13) + "Table " + Nvl(alltrim(table_cat)+".","") + Nvl(alltrim(Table_schem)+".","")+alltrim(Table_name)
 
 								this.AddItem(alltrim(column_name), 17, lcToolTip)
 							endif
@@ -6943,6 +6977,7 @@ define class FoxCodePlusMain as custom
 		
 		set console off
 		
+	
 		*- acho a maior largura entre os itens 
 		with this.IntelliSense.Tabs.TabPage1.Items
 			lnItemWidth = txtwidth(plcItem, .fontName, .fontSize) * this.IntelliSense.AvgCharWidth
@@ -7544,10 +7579,10 @@ define class FoxCodePlusMain as custom
 		local llReturn
 		llReturn = .t.
 		
-		if this.IncrementalResult
+		if this.IncrementalResult 
 			*- se contem o que foi digitado
 			if this.cboSearch = "0"
-				if not lower(plcLastWord) $ lower(plcItem)		
+				If not lower(plcLastWord) $ lower(plcItem) 		
 					llReturn = .f.
 				endif
 				
@@ -8023,7 +8058,7 @@ enddefine
 */ Classe para controlar a versao do FoxcodePlus
 */------------------------------------------------------------------------------------------------	
 define class xfcpVersion as custom
-	Version = "Beta 3.13.2"
+	Version = "Beta 3.24.13"
 	DateTime = ttoc( iif(file(addbs(home(1)) + "foxcodeplus.app"), fdate(addbs(home(1))+"foxcodeplus.app",1), "") )
 	Author = "Rodrigo Duarte Bruscain"
 	CountryAndCity = "kitchener ON - Canada"
