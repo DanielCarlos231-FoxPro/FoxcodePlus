@@ -2,6 +2,8 @@
 I am NOT the author of this project 
 
 This is an open source project downloaded from <a href="https://github.com/VFPX/FoxcodePlus">VFPX\FoxCodePlus Repository</a>
+# Version
+FoxCodePlus Beta 3.24.13
 
 # Added Functionalities
 Since then I have added to this project the following functionalities
@@ -17,6 +19,7 @@ Since then I have added to this project the following functionalities
   <li>The functions from my projects were not loading to the table of Foxcodeplus, because I would first copy the compiled PRGs to the TEMP folder of Windows with the extension of APP, and then I would "SET PROCEDURE TO" to the APPs. So, I tweaked it a little bit and got it working on my projects by making it also look in every folder that was set on "SET PATH TO". So, if a PRG was not located at the main folder, it would look through every other folder available in the "SET PATH TO"</li>
   <li>The Aliases of SQL Tables were not being added to the Intellisense in a Text To... EndText text block</li>
   <li>The Fields of the aliases of SQL Tables, were not being added to the Intellisense in a "Text To... EndText" text block. They would only appear if the user were to type the name of the table, an not its alias</li>
+  <li>Error on null value while getting the Table_Cat and Table_Schem from DBAs to build the ToolTip for tables and fields</li>
 <ol>   
 
 ****
