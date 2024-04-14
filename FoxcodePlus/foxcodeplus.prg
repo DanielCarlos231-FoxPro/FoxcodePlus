@@ -10,6 +10,8 @@
 */ NEW (DCA) - 13/07/2023 - nº (#999999) STATUS	(Em Desenvolvimento)
 */						  - Adidionando variável isDev, para indicar se está em Desenvolvimento ou Produção
 */						  - Adicionando a variável oError para salvar o Erros de execução, por enquanto só usu em Try... ... Endtry
+*/ FIX (DCA) - 14/04/2024 - nº (#000022) - Comentei o this.GetSqlFieldsInAllTablesCmd(), está causando um delay muito grande e em seguida dá um crash no VFP e fecha
+*/						  - Ele é responsável por buscar todos os campos de todas as tabelas dentro do Text To... EndText
 */
 */ FIX (DCA) - 13/04/2024 - nº (#000021) - STATUS (OK)
 */						  - Erro ao montar toolTip para tabelas do FireBird		
@@ -906,11 +908,13 @@ define class FoxCodePlusMain as custom
 							endif							
 						endif	
 
+					&& (DCA) - 14/04/2024 - nº (#000022) - Está causando um Delay muito grande
 						*- Todos os campos das tabelas e alias incluidas no instruncao SQL no modo incremental
 						&& (DCA) - 15/07/2023 - nº (#000017) - Adicionei o this.HasDoubleDot
-						if this.chkIncrFieldsSql = "1" and not this.HasDoubleDot
-							lnLines = lnLines + this.GetSqlFieldsInAllTablesCmd()
-						EndIf
+					*	if this.chkIncrFieldsSql = "1" and not this.HasDoubleDot
+					*		lnLines = lnLines + this.GetSqlFieldsInAllTablesCmd()
+					*	EndIf
+					&& (DCA) - 14/04/2024 - nº (#000022) - Está causando um Delay muito grande
 						
 					endif
 				endif					
@@ -1193,7 +1197,6 @@ define class FoxCodePlusMain as custom
 		ENDIF
 	endproc
 	
-	
 	*/------------------------------------------------------------------------------*/
 	*/ (DCA) - 16/07/2023 - nº (#000019) - A função OS() não funcion no Windows 10  */
 	*/------------------------------------------------------------------------------*/
@@ -1265,7 +1268,9 @@ define class FoxCodePlusMain as custom
 
 		CASE EMPTY(m.tnType)
 			DO CASE
-			CASE m.lnMajor = 10 AND m.lnMinor = 0
+			CASE m.lnMajor = 10 AND m.lnMinor = 0 and m.lnBuild >= 21996
+				m.lcOS = "Windows 11"
+			CASE m.lnMajor = 10 AND m.lnMinor = 0 and m.lnBuild <  21996
 				m.lcOS = "Windows 10"
 			CASE m.lnMajor = 6 AND m.lnMinor = 3
 				m.lcOS = "Windows 8.1 / Server 2012 R2"
@@ -8058,7 +8063,7 @@ enddefine
 */ Classe para controlar a versao do FoxcodePlus
 */------------------------------------------------------------------------------------------------	
 define class xfcpVersion as custom
-	Version = "Beta 3.24.13"
+	Version = "Beta 3.24.14"
 	DateTime = ttoc( iif(file(addbs(home(1)) + "foxcodeplus.app"), fdate(addbs(home(1))+"foxcodeplus.app",1), "") )
 	Author = "Rodrigo Duarte Bruscain"
 	CountryAndCity = "kitchener ON - Canada"
