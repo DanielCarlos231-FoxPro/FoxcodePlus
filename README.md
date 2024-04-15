@@ -20,7 +20,7 @@ Since then I have added to this project the following functionalities
   <li>The Aliases of SQL Tables were not being added to the Intellisense in a Text To... EndText text block</li>
   <li>The Fields of the aliases of SQL Tables, were not being added to the Intellisense in a "Text To... EndText" text block. They would only appear if the user were to type the name of the table, an not its alias</li>
   <li>Error on null value while getting the Table_Cat and Table_Schem from DBAs to build the ToolTip for tables and fields</li>
-  <li>Crashing VFP inside Text to... EndText, because of IntelliSense to show Fields and tables for conected SQL databases</li>
+  <li>Crashing VFP inside Text to... EndText, because of IntelliSense to show fields and tables for conected SQL databases</li>
 <ol>   
 
 ****
