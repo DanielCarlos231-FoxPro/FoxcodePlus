@@ -2,7 +2,7 @@
 I am NOT the author of this project 
 
 This is an open source project downloaded from <a href="https://github.com/VFPX/FoxcodePlus">VFPX\FoxCodePlus Repository</a>
-# FoxCodePlus Beta 3.24.14
+# FoxCodePlus Beta 3.24.15
 
 # Added Functionalities
 Since then I have added to this project the following functionalities
