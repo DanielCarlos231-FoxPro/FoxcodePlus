@@ -7,9 +7,12 @@
 */		   Verificar a Procedure Error, pois resolvi ignorar alguns erros. Talvêz seja necessário não ignorar os erros
 */         para que possa pegar a mensagem de erro completa e entender o que está acontecendo para causar o comportamento indesejado
 */
-*/ NEW (DCA) - 13/07/2023 - nº (#999999) STATUS	(Em Desenvolvimento)
+*/ NEW (DCA) - 13/07/2023 - nº (#999999) - STATUS (Em Desenvolvimento)
 */						  - Adidionando variável isDev, para indicar se está em Desenvolvimento ou Produção
 */						  - Adicionando a variável oError para salvar o Erros de execução, por enquanto só usu em Try... ... Endtry
+*/ FIX (DCA) - 05/05/2024 - nº (#000023) - STATUS (Em Testes)
+*/						  - Colocando execução dentro de um "TRY..CATCH...ENDTRY"
+*/
 */ FIX (DCA) - 14/04/2024 - nº (#000022) - Comentei o this.GetSqlFieldsInAllTablesCmd(), está causando um delay muito grande e em seguida dá um crash no VFP e fecha
 */						  - Ele é responsável por buscar todos os campos de todas as tabelas dentro do Text To... EndText
 */
@@ -553,51 +556,61 @@ define class FoxCodePlusMain as custom
 	protected procedure GetKeyPressed
 		lparameters pln1 as Integer, pln2 as Integer, plnKey as Integer, pln4 as Integer, pll5 as Boolean
 		
-		
 		set console off
 		sys(2030,0) 
 		
-		
-		*- check if debug is active
-		*- desabilito o IntelliSense se o debug estiver ativo para nao entrar em conflito com o foxcodeplus.		
-		this.ChkDebugger()
-		if this.HasDebugger
-			if this.IntelliSense.Showed 
-				this.IntelliSense.hide()
-			ENDIF
+		&& nº (#000023) - STATUS (Em Testes)
+		&& (DCA) - 05/05/2024 - Estou tendo muito erro "Fatal error: Exception code=C0000005 @ 05/05/24 10:35:38 AM Error log file C:\Program Files (x86)\MicroSoft Visual FoxPro 9\vfp9err.log"
+		&&					  - Por isso estou colocando toda operação em um "TRY..CATCH..ENDTRY"
+		TRY 
+			*- check if debug is active
+			*- desabilito o IntelliSense se o debug estiver ativo para nao entrar em conflito com o foxcodeplus.		
+			this.ChkDebugger()
+			if this.HasDebugger
+				if this.IntelliSense.Showed 
+					this.IntelliSense.hide()
+				ENDIF
+				
+				sys(2030,1)
+				return 
+			endif
 			
-			sys(2030,1)
-			return 
-		endif
+			&& (DCA) - 18/02/2023 - nº (#000004)
+			&& PARA MAIS INFORMAÇÕES VERIFICAR A FUNÇÃO ChkReportDesigner()	
+			this.ChkReportDesigner() 
+			IF This.HasReportOnTop  
+			 	this.IntelliSense.Showed = .F.  
+				this.IntelliSense.hide() 
+			
+				sys(2030,1)
+				return 
+			ENDIF
+			&& FIX - (DCA) - 18/02/2023  -- EM TESTES
+			
+			*- Save VFP environment
+			this.SetFoxcodePlusEnvironment(1)			
+			   
+			*- main function
+			this.Main(pln1, pln2, plnKey, pln4, pll5)
+			
+			*- Restore VFP environment
+			this.SetFoxcodePlusEnvironment(0)			
+			
+		CATCH TO loException
+			
+			***********************************************
+			***********************************************
+			***********************************************
+			
+		ENDTRY
 		
-		&& (DCA) - 18/02/2023 - nº (#000004)
-		&& PARA MAIS INFORMAÇÕES VERIFICAR A FUNÇÃO ChkReportDesigner()	
-		this.ChkReportDesigner() 
-		IF This.HasReportOnTop  
-		 	this.IntelliSense.Showed = .F.  
-			this.IntelliSense.hide() 
-		
-			sys(2030,1)
-			return 
-		ENDIF
-		&& FIX - (DCA) - 18/02/2023  -- EM TESTES
-		
-		*- Save VFP environment
-		this.SetFoxcodePlusEnvironment(1)			
-		   
-		*- main function
-		this.Main(pln1, pln2, plnKey, pln4, pll5)
-		
-		*- Restore VFP environment
-		this.SetFoxcodePlusEnvironment(0)			
-		
-		
-					
 		*this.EditorToolTip.NoClose = .f.		
 		set console on
 		activate screen								&&- caso o Error list esteja aberto asseguro de que qualquer informacao "output" seja enviada ao _Scree
 		sys(2030,1)
-		return
+			
+		Return
+
 	endproc 
 	
 	
@@ -1291,7 +1304,7 @@ define class FoxCodePlusMain as custom
 			m.lcReturn = m.lcOS + " " + TRANSFORM(m.lnMajor) + "." + TRANSFORM(m.lnMinor) + " build " + TRANSFORM(m.lnBuild)
 
 		CASE m.tnType = 1
-			m.lcReturn = "Windows " + TRANSFORM(m.lnMajor) + "." + TRANSFORM(m.lnMinor)
+			m.lcReturn = "Windows " + TRANSFORM(Iif(m.lnBuild >= 21996, 11, 10)) + "." + TRANSFORM(m.lnMinor)
 
 		CASE INLIST(m.tnType, 2, 6, 7, 8, 9, 10, 11)
 			m.lcReturn = ""
@@ -1319,7 +1332,7 @@ define class FoxCodePlusMain as custom
 	*/ (DCA) - Pegar Handle da janela em passada
 	*/ 
 	*/-------------------------------
-	protected procedure getWindowHwnd()
+	protected procedure getWindowHwnd
 		LPARAMETERS pWindowCap && Caption of the Window
 		set console off
 		
@@ -1344,7 +1357,6 @@ define class FoxCodePlusMain as custom
 		clear dlls "xxfcpWinAPI_GetActiveWindow","xxfcpWinAPI_GetWindow","xxfcpWinAPI_GetWindowText"
 		RETURN lnNext
 	endproc
-	*/ (DCA) + TESTES
 	*/************************************************************************************************
 	
 	
@@ -8063,7 +8075,7 @@ enddefine
 */ Classe para controlar a versao do FoxcodePlus
 */------------------------------------------------------------------------------------------------	
 define class xfcpVersion as custom
-	Version = "Beta 3.24.14"
+	Version = "Beta 3.24.15"
 	DateTime = ttoc( iif(file(addbs(home(1)) + "foxcodeplus.app"), fdate(addbs(home(1))+"foxcodeplus.app",1), "") )
 	Author = "Rodrigo Duarte Bruscain"
 	CountryAndCity = "kitchener ON - Canada"
