@@ -2758,6 +2758,8 @@ define class FoxCodePlusMain as custom
 
 		set console off
 		
+		SET STEP on
+		
 		this.WithReference = ""
 		
 		local array laProcClass[1,4]
